@@ -6,7 +6,7 @@ setup(
     name='DICpy',
     version="0.0.1",
     url='https://github.com/eesd-epfl/DICpy',
-    description="PyCrack is a Python toolbox for analysis and quantification of cracks structural systems using optical methods.",
+    description="DICpy is a python toolbox for digital image correlation analysis.",
     author="Ketson R. M. dos Santos",
     author_email="ketson.santos@epfl.ch",
     license='MIT',
@@ -15,7 +15,7 @@ setup(
     package_dir={"": "src"},
     package_data={"": ["*.pdf"]},
     install_requires=[
-        "numpy", "scipy", "matplotlib", "scikit-learn", "scikit-image"
+        "numpy", "scipy", "matplotlib", "scikit-learn", "scikit-image", "opencv-python"
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
