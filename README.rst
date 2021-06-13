@@ -8,7 +8,7 @@ DICpy: digital image correlation with python
 
 :Authors: Ketson R. M. dos Santos
 :Contact: ketson.santos@epfl.ch
-:Version: 0.0.7
+:Version: 0.0.9
 
 
 Description
