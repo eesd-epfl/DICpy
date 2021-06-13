@@ -28,8 +28,8 @@ The module currently contains the following classes:
 
 """
 
-from Utils import *
-from Utils import _close
+from DICpy.Utils import *
+from DICpy.Utils import _close
 import numpy as np
 import scipy as sp
 import matplotlib.patches as patches
