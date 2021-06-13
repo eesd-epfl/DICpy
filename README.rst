@@ -32,7 +32,7 @@ Dependencies
 
 License
 ===========
-PyCrack is distributed under the MIT license
+DICpy is distributed under the MIT license
 
 Copyright (c) 2020 Earthquake Engineering and Structural Dynamics laboratory
 
@@ -50,13 +50,13 @@ From PyPI
 
             * ::
 
-                        pip install ...
+                        pip install DICpy
 
 In order to uninstall it
 
             * ::
 
-                        pip uninstall ...
+                        pip uninstall DICpy
 
 Using Conda
 
@@ -68,17 +68,17 @@ Clone your fork of the PyCrack repo from your GitHub account to your local disk 
 
             * ::
 
-                        git clone https://github.com/eesd-epfl/PyCrack.git
-                        cd PyCrack/
+                        git clone https://github.com/eesd-epfl/DICpy.git
+                        cd DICpy/
                         python setup.py install  (user installation)
                         python setup.py develop (developer installation)
 
-Referencing PyCrack
-=================
+#Referencing DICpy
+#=================
 
-If you are using this software in a work that will be published, please cite this paper:
+#If you are using this software in a work that will be published, please cite this paper:
 
-...
+#...
 
 
 Help and Support
