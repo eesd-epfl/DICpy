@@ -1,6 +1,6 @@
 # PyCrack is distributed under the MIT license.
 #
-# Copyright (C) 2020  -- Katrin Beyer
+# Copyright (C) 2021  -- Katrin Beyer
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 # documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,9 +17,46 @@
 
 
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
 
+
+def _correlation(f, g):
+
+    m_f = np.mean(f)
+    m_g = np.mean(g)
+
+    c = np.sqrt(np.sum((f - m_f) ** 2) * np.sum((g - m_g) ** 2))
+    corr = np.sum((f - m_f) * (g - m_g)) / c
+
+    return corr
+
+def _mouse_click(event):
+    global x, y
+    x, y = event.xdata, event.ydata
+
+    if event.button:
+        circle = plt.Circle((event.xdata, event.ydata), rcirc, color='red')
+        ax.add_patch(circle)
+        fig.canvas.draw()  # this line was missing earlier
+
+    global coords
+    coords.append((x, y))
+    print(x, y)
+    if len(coords) == 2:
+        fig.canvas.mpl_disconnect(cid)
+
+        xa = coords[0][0]
+        ya = coords[0][1]
+        xb = coords[1][0]
+        yb = coords[1][1]
+        lx = (xb - xa)
+        ly = (yb - ya)
+        rect = patches.Rectangle((xa, ya), lx, ly, linewidth=1, edgecolor='None', facecolor='b', alpha=0.4)
+        ax.add_patch(rect)
+        fig.canvas.draw()  # this line was missing earlier
+        plt.close()
+
+    return coords
 
 def get_template(im_source=None, center=None, side=None):
     # Crop image (im_source) to get a square patch (im_template) with center in
@@ -59,8 +96,8 @@ def get_template_left(im_source=None, point=None, sidex=None, sidey=None):
     row_0 = p_row
     col_0 = p_col
 
-    row_1 = p_row + sidey
-    col_1 = p_col + sidex
+    row_1 = p_row + sidey - 1
+    col_1 = p_col + sidex - 1
 
     id_row = np.arange(row_0, row_1 + 1)
     id_col = np.arange(col_0, col_1 + 1)
