@@ -43,7 +43,7 @@ If you would like to cite DICpy, please use the following citation/bibtex
 }
 ```
 
-# License
+# License 
 
 This package is licensed with the MIT license.
 
