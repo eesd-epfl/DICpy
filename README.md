@@ -1,3 +1,5 @@
+![plot](./logo.png)
+
 [![Pypi](https://badge.fury.io/py/DICpy.svg)](https://badge.fury.io/py/DICpy.svg)
 [![Downloads](https://pypip.in/download/DICpy/badge.svg)](https://pypi.python.org/DICpy/)
 
