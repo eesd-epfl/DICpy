@@ -4,6 +4,9 @@ DICpy: digital image correlation with python
 
 |logo|
 
+[![Pypi](https://badge.fury.io/py/DICpy.svg)](https://badge.fury.io/py/DICpy.svg)
+[![Downloads](https://pypip.in/download/DICpy/badge.svg)](https://pypi.python.org/DICpy/)
+
 .. image:: https://badge.fury.io/py/DICpy.svg
     :target: https://badge.fury.io/py/DICpy
 
