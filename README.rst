@@ -1,11 +1,11 @@
-.. image:: https://badge.fury.io/py/DICpy.svg
-    :target: https://badge.fury.io/py/DICpy
-
 *******************************************************
 DICpy: digital image correlation with python
 *******************************************************
 
 |logo|
+
+.. image:: https://badge.fury.io/py/DICpy.svg
+    :target: https://badge.fury.io/py/DICpy
 
 ====
 
