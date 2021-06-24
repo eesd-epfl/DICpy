@@ -1,98 +1,50 @@
-*******************************************************
-DICpy: digital image correlation with python
-*******************************************************
-
-|logo|
-
 [![Pypi](https://badge.fury.io/py/DICpy.svg)](https://badge.fury.io/py/DICpy.svg)
 [![Downloads](https://pypip.in/download/DICpy/badge.svg)](https://pypi.python.org/DICpy/)
 
-.. image:: https://badge.fury.io/py/DICpy.svg
-    :target: https://badge.fury.io/py/DICpy
-
-====
-
-:Authors: Ketson R. M. dos Santos
-:Contact: ketson.santos@epfl.ch
-:Version: 0.1.1
-
-
-Description
-===========
-
 DICpy is a python toolbox for digital image correlation analysis.
 
-Documentation
-================
-
-Website:
-           https://....readthedocs.io
-
-Dependencies
-===========
-
-            * ::
-            
-                Python >= 3.6
-                Git >= 2.13.1
-
-License
-===========
-DICpy is distributed under the MIT license
-
-Copyright (c) 2020 Earthquake Engineering and Structural Dynamics laboratory
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+This python package provide a set of methods used in Digital Image Correlation for the estimation of displacement and strain fields in materials. 
 
 
-Installation
-===========
+# Documentation 
 
-From PyPI
+For complete documentation please checkout:
 
-            * ::
+# Contact 
 
-                        pip install DICpy
-
-In order to uninstall it
-
-            * ::
-
-                        pip uninstall DICpy
-
-Using Conda
-
-            * ::
-
-                        conda install --channel  ``...``  ...
-
-Clone your fork of the PyCrack repo from your GitHub account to your local disk (to get the latest version): 
-
-            * ::
-
-                        git clone https://github.com/eesd-epfl/DICpy.git
-                        cd DICpy/
-                        python setup.py install  (user installation)
-                        python setup.py develop (developer installation)
-
-#Referencing DICpy
-#=================
-
-#If you are using this software in a work that will be published, please cite this paper:
-
-#...
+Developers can contribute with the development of this project using [github](https://github.com/eesd-epfl/DICpy).
 
 
-Help and Support
-===========
+# Setup
 
-.. |logo| image:: logo.png
-    :scale: 10 %
-    :target: https://github.com/eesd-epfl/DICpy
-    
-.. image:: python_powered.png
- :target: https://www.python.org
+To install DICpy from PyPI
+```
+    pip install DICpy
+```
+
+To uninstall DICpy
+```
+    pip uninstall DICpy
+```
+
+# Citations
+
+If you would like to cite DICpy, please use the following citation/bibtex
+
+> ....
+
+```
+@misc{dicpy2021,
+  author       = {},
+  title        = {},
+  year         = 2021,
+}
+```
+
+# License
+
+This package is licensed with the MIT license.
+
+# Contributing
+
+Contributions are more than welcome! There are lots of opportunities for potential projects, so please get in touch if you would like to help out. Everything from code to notebooks to examples and documentation are all equally valuable so please don't feel you can't contribute. To contribute please fork the project make your changes and submit a pull request. We will do our best to work through any issues with you and get your code merged into the main branch.
