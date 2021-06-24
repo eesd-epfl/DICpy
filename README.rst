@@ -1,6 +1,3 @@
-[![Pypi](https://badge.fury.io/py/scikit-tda.svg)](https://badge.fury.io/py/scikit-tda)
-[![Downloads](https://pypip.in/download/scikit-tda/badge.svg)](https://pypi.python.org/scikit-tda/)
-
 .. image:: https://badge.fury.io/py/DICpy.svg
     :target: https://badge.fury.io/py/DICpy
 
