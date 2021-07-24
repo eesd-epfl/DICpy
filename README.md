@@ -5,10 +5,9 @@
 
 DICpy is a python toolbox for digital image correlation analysis.
 
-This python package provide a set of methods used in Digital Image Correlation for the estimation of displacement and strain fields in materials. It is developed and maintained by the Earthquake Engineering & Structural Dynamics lab at EPFL (Switzerland).
+This python package contains a set of methods used in Digital Image Correlation for estimating displacement and strain fields in materials. It is developed and maintained by the Earthquake Engineering & Structural Dynamics lab at EPFL (Switzerland).
 
 The current version is a pre-release; therefore, users must consider the inherent risks of using a package under development. 
-
 
 # Documentation 
 
