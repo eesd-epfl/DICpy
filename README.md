@@ -11,7 +11,7 @@ The current version is a pre-release; therefore, users must consider the inheren
 
 # Documentation 
 
-For complete documentation please checkout:
+Under construction.
 
 # Contact 
 
