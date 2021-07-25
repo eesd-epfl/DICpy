@@ -1,27 +1,12 @@
-# PyCrack is distributed under the MIT license.
-#
-# Copyright (C) 2021  -- Katrin Beyer
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-# persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-# Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+# DICpy: Utilities used on all the classes of DICpy.
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 def _correlation(f, g):
-
+    # Private class for the correlation between data stored in f and in g. 
+    
     m_f = np.mean(f)
     m_g = np.mean(g)
 
@@ -31,17 +16,23 @@ def _correlation(f, g):
     return corr
 
 def _mouse_click(event):
+    # Private class to capture the coordinates of the mouse after clicking in a region of the image.
+    
+    # The coordinates x and y are stored as global coordinates.
     global x, y
     x, y = event.xdata, event.ydata
 
+    # Once the click is detected, a circle is created on the image.
     if event.button:
         circle = plt.Circle((event.xdata, event.ydata), rcirc, color='red')
         ax.add_patch(circle)
         fig.canvas.draw()  # this line was missing earlier
 
+    # Store the coordinates x and y,    
     global coords
     coords.append((x, y))
-    print(x, y)
+    #print(x, y)
+    # Draw a rectangle considering two points as the opposite coorners of a rectangle.
     if len(coords) == 2:
         fig.canvas.mpl_disconnect(cid)
 
@@ -107,14 +98,11 @@ def get_template_left(im_source=None, point=None, sidex=None, sidey=None):
     return im_template
 
 def _close(event):
+    # Close event (e.g., click).
     plt.close()
 
 def pad(model_script, model_object_name, sample, dict_kwargs=None):
-    """
-    Execute the python model in parallel
-    :param sample: One sample point where the model has to be evaluated
-    :return:
-    """
+    # todo: test for parallel processing.
 
     exec('from ' + model_script[:-3] + ' import ' + model_object_name)
     # if kwargs is not None:
