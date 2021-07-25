@@ -1,20 +1,3 @@
-# DICpy is distributed under the MIT license.
-#
-# Copyright (C) 2021  -- Katrin Beyer
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-# persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-# Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 """
 ``DIC2Local`` is the module for ``DICpy`` to perform the local 2D digital image correlation (DIC).
 
@@ -130,16 +113,18 @@ class RectangularMesh:
 
         **Output/Returns:**
         """
-
+        
+        # Maximum dimension of the image.
         maxl = max(self.images_obj.lx, self.images_obj.ly)
         self.nx = nx
         self.ny = ny
 
         global rcirc, ax, fig, coords, cid
         rcirc = maxl / 160
-
+        
         if point_a is None or point_b is None:
-
+            # If the opposite corners are not provided by the user, use the mouse click.
+                
             coords = []
 
             fig = plt.figure()
@@ -152,7 +137,8 @@ class RectangularMesh:
             point_b = coords[1]
 
         else:
-
+            # otherwise, draw the points in the image.
+            
             fig = plt.figure()
             ax = fig.add_subplot(111)
 
@@ -173,6 +159,7 @@ class RectangularMesh:
             plt.show(block=False)
             plt.close()
 
+        # Get the x and y coordinates for the opposite corners.    
         xa = point_a[0]
         xb = point_b[0]
         ya = point_a[1]
@@ -181,13 +168,15 @@ class RectangularMesh:
         self.point_a = point_a
         self.point_b = point_b
 
+        # Define a grid in the area of interest where the DIC is performed.
         stepx = np.sort(np.linspace(xa, xb, nx))
         stepy = np.sort(np.linspace(ya, yb, ny))
 
-        # Transform from continuous to discrete.
+        # Transform grid: from continuous to discrete.
         stepx = np.array([round(x) for x in stepx])
         stepy = np.array([round(y) for y in stepy])
 
+        # Conditions for the grid used in the DIC analysis at DICpy.
         if min(np.diff(stepx)) < 15:
             raise ValueError('DICpy: small subset, reduce nx.')
 
@@ -197,11 +186,13 @@ class RectangularMesh:
         self.stepx = stepx
         self.stepy = stepy
 
+        # Determine the mesh from the points in the grid.
         xp, yp = np.meshgrid(stepx, stepy)
 
         centers = []
         wind = []
-
+        
+        # Get the center and the dimension of the elements in the mesh.
         for i in range(ny - 1):
             for j in range(nx - 1):
                 l_x = abs(xp[i + 1, j + 1] - xp[i, j])
@@ -216,7 +207,7 @@ class RectangularMesh:
         self.centers = centers
         self.wind = wind
 
-        # plt.close()
+        # Plot a circle for each point in the grid (nodes of the mesh).
         fig = plt.figure()
         ax = fig.add_subplot(111)
         for i in range(nx):
@@ -225,8 +216,9 @@ class RectangularMesh:
                 yy = stepy[j]
                 circle = plt.Circle((xx, yy), rcirc, color='red')
                 ax.add_patch(circle)
-                fig.canvas.draw()  # this line was missing earlier
+                fig.canvas.draw()  
 
+        # Draw a rectangle defining the area of interest.
         lx = (point_b[0] - point_a[0])
         ly = (point_b[1] - point_a[1])
         rect = patches.Rectangle(point_a, lx, ly, linewidth=1, edgecolor='None', facecolor='b', alpha=0.4)
@@ -243,6 +235,8 @@ class RectangularMesh:
 
         """
         Private method to determine the elements of the mesh (under construction!).
+        This method will be used for the global DIC in the future, this is why it is
+        defined as PRIVATE.
 
         **Input:**
 
@@ -369,11 +363,15 @@ class Analysis:
         **Output/Returns:**
         """
 
+        # Get images.
         images = self.mesh_obj.images_obj.images
+        
+        # Get the number of images.
         num_img = self.mesh_obj.images_obj.num_img
         xp = self.mesh_obj.xp
         yp = self.mesh_obj.yp
 
+        # Initialize a vector for the displacements u and v.
         u = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
         v = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
 
@@ -383,7 +381,8 @@ class Analysis:
         # Loop over the images.
         for k in range(num_img - 1):
 
-            img_0 = images[k]
+            # Two consecutive images to performe the DIC.
+            img_0 = images[k] 
             img_1 = images[k + 1]
 
             # Loop over the elements.
@@ -391,37 +390,58 @@ class Analysis:
             centers = []
             for i in range(self.mesh_obj.ny - 1):
                 for j in range(self.mesh_obj.nx - 1):
+                    
+                    # Dimension of the element.
                     l_x = abs(xp[i + 1, j + 1] - xp[i, j])
                     l_y = abs(yp[i + 1, j + 1] - yp[i, j])
+                    
+                    # Center of the element.
                     xc = (xp[i + 1, j + 1] + xp[i, j]) / 2
                     yc = (yp[i + 1, j + 1] + yp[i, j]) / 2
                     centers.append((xc, yc))
 
+                    # Gaps between the search area and the size of the element in both
+                    # x and y dimensions.
                     gap_x = int(max(np.ceil(l_x / 3), 3))
                     gap_y = int(max(np.ceil(l_y / 3), 3))
 
+                    # Define the coroners of the search area.
                     xtem_0 = xp[i, j] + gap_x
                     ytem_0 = yp[i, j] + gap_y
                     xtem_1 = xp[i + 1, j + 1] - gap_x
                     ytem_1 = yp[i + 1, j + 1] - gap_y
 
+                    # Size of the window of the search area.
                     window_x = abs(xtem_1 - xtem_0) + 1
                     window_y = abs(ytem_1 - ytem_0) + 1
 
+                    # Position of the corner of reference in the search area.
                     ptem = (ytem_0, xtem_0)
                     psearch = (yp[i, j], xp[i, j])
 
+                    # Image template.
                     img_template = get_template_left(im_source=img_0, point=ptem, sidex=window_x, sidey=window_y)
+                    
+                    # Search area.
                     img_search = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
 
+                    # Determine the displacements, considering or not the subpixel resolution.
                     if sub_pixel is None:
+                        # No subpixel resolution.
+         
                         px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
                         px = int(px)
                         py = int(py)
+                    
                     elif sub_pixel == 'crude':
+                        # Crude method using oversampling.
                         px, py = self.template_match_sk(img_search, img_template, mlx=oversampling_x,
                                                         mly=oversampling_y)
+                        
+                        
                     elif sub_pixel == 'gradient':
+                        # Using Taylor expansion.
+                        
                         px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
                         px = int(px)
                         py = int(py)
@@ -431,7 +451,10 @@ class Analysis:
 
                         px = px + delta[0]
                         py = py + delta[1]
+                        
                     elif sub_pixel == 'coarse_fine':
+                        # Using the coarse_fine method.
+                        
                         px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
                         px = int(px)
                         py = int(py)
@@ -448,12 +471,15 @@ class Analysis:
                     else:
                         raise NotImplementedError('DICpy: not recognized method.')
 
+                    # Update the displacement.
                     u0 = px - gap_x
                     v0 = py - gap_y
-
+                    
+                    # Accumulate the displacements.
                     usum[i, j] = usum[i, j] + (u0 * self.pixel_dim)
                     vsum[i, j] = vsum[i, j] + (v0 * self.pixel_dim)
 
+                    # Store the snapshots of the displacement field.
                     u[k, i, j] = usum[i, j]
                     v[k, i, j] = vsum[i, j]
 
@@ -497,9 +523,9 @@ class Analysis:
         x = np.arange(px, px + window_x)
         y = np.arange(py, py + window_y)
 
-        plt.close()
-        plt.figure(111)
-        plt.imshow(img_u)
+        #plt.close()
+        #plt.figure(111)
+        #plt.imshow(img_u)
 
         img_0 = img_u
 
@@ -576,14 +602,15 @@ class Analysis:
         # Regularly-spaced, coarse grid
         x0 = np.arange(0, lx)
         y0 = np.arange(0, ly)
-        # X, Y = np.meshgrid(x, y)
 
+        # Interpolator.
         interp_spline = RectBivariateSpline(y0, x0, f)
 
         xt = x + dx
         yt = y + dy
 
         z = np.zeros((len(yt), len(xt)))
+        # Interpolation.
         for i in range(len(yt)):
             for j in range(len(xt)):
                 z[i, j] = interp_spline(yt[i], xt[j])
@@ -649,6 +676,7 @@ class Analysis:
         c1 = np.sum(fg * gx)
         c2 = np.sum(fg * gy)
 
+        # Solve the linear system.
         Ainv = np.linalg.inv(np.array([[a11, a12], [a12, a22]]))
         C = np.array([c1, c2])
         delta = Ainv @ C
@@ -799,7 +827,7 @@ class PostProcessing:
         **Output/Returns:**
         """
 
-        # Derivative
+        # Derivative estimation.
         d_ker = np.matrix([-1., 0, 1.])
         u = self.analysis_obj.u
         v = self.analysis_obj.v
@@ -830,6 +858,7 @@ class PostProcessing:
                     dy.append(v[k, i, j])
                     c = c + 1
 
+            # Use Gaussian Process to estimate the derivatives with subpixel resolution.
             gpu = GaussianProcessRegressor(n_restarts_optimizer=10, normalize_y=True)
             gpu.fit(points, dx)
 
@@ -845,6 +874,8 @@ class PostProcessing:
 
             for i in range(np.shape(u)[1]):
                 for j in range(np.shape(u)[2]):
+                    # Prediction and derivative estimation.
+                    
                     p0 = [[centers[c][0], centers[c][1]]]
                     p1 = [[centers[c][0] + h, centers[c][1]]]
                     pred0ux = gpu.predict(p0)[0]
@@ -864,6 +895,7 @@ class PostProcessing:
                     d21 = (pred1vx - pred0vx) / h
                     d22 = (pred1vy - pred0vy) / h
 
+                    # Compute the strain fields.
                     strain_11[i, j] = d11 + 0.5 * (d11 ** 2 + d22 ** 2)
                     strain_22[i, j] = d22 + 0.5 * (d11 ** 2 + d22 ** 2)
                     strain_12[i, j] = 0.5 * (d12 + d21 + d11 * d12 + d21 * d22)
@@ -871,6 +903,7 @@ class PostProcessing:
 
                     c = c + 1
 
+            # Store the strain fields.        
             strain_matrix_11.append(strain_11)
             strain_matrix_22.append(strain_22)
             strain_matrix_12.append(strain_12)
@@ -964,6 +997,7 @@ class PostProcessing:
         extent = np.min(x), np.max(x), np.min(y), np.max(y)
         extentm = np.min(xm), np.max(xm), np.shape(img)[0] - np.max(ym), np.shape(img)[0] - np.min(ym)
 
+        # If smooth, use a Gaussian filter in the field being displayed on the original image.
         if smooth:
             lx = stepx[1] - stepx[0]
             ly = stepy[1] - stepy[0]
