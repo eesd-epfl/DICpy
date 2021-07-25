@@ -1,20 +1,3 @@
-# DICpy is distributed under the MIT license.
-#
-# Copyright (C) 2021  -- Katrin Beyer
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-# persons to whom the Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-# Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-# WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 """
 ``PreProcessing`` is the module for ``DICpy`` to read and pre-processing the images used in the DIC analysis.
 
@@ -117,7 +100,8 @@ class Images:
 
         **Output/Returns:**
         """
-
+        
+        # Initial checks.
         if not isinstance(ref_id,int):
             raise TypeError('DICpy: ref_id must be an integer.')
 
@@ -190,7 +174,7 @@ class Images:
             print('DICpy: reading the calibration image.')
 
         im = sio.imread(os.path.join(path, file_name), as_gray=True)
-        calibration_image = 255 * im
+        calibration_image = 255 * im # The pixels goes from 0 to 255.
 
         return calibration_image
 
@@ -230,15 +214,23 @@ class Images:
             if ref_length is None:
                 raise TypeError('DICpy: ref_length cannot be NoneType.')
 
+            # path for the calibration image.    
             self.path_calibration = path
+            
+            # Read the callibration images.
             cal_img = self._read_calibration_images(path=path, file_name=file_name, verbose=verbose)
             self.calibration_image = cal_img
+            
+            # Get the shape of the callibration images.
             (lx, ly) = np.shape(cal_img)
-            maxl = max(lx, ly)
+            maxl = max(lx, ly) # Maximum length.
 
+            # The commands presented next are used to draw the graphical elements, such as 
+            # circles and the rectangle corresponding to the area of interest.
             global rcirc, ax, fig, coords, cid
             rcirc = maxl / 160
 
+            # point_a and point_b are the opposite corners defining the are of interest.
             if point_a is None or point_b is None:
                 coords = []
 
@@ -286,13 +278,11 @@ class Images:
 
             circle = plt.Circle(point_a, rcirc, color='red')
             ax.add_patch(circle)
-            fig.canvas.draw()  # this line was missing earlier
+            fig.canvas.draw()  
             circle = plt.Circle(point_b, rcirc, color='red')
             ax.add_patch(circle)
-            fig.canvas.draw()  # this line was missing earlier
+            fig.canvas.draw()  
 
-            #rect = patches.Rectangle(point_a, lx, ly, linewidth=1, edgecolor='None', facecolor='b', alpha=0.4)
-            #ax.add_patch(rect)
             ax.plot([point_a[0], point_b[0]], [point_a[1], point_b[1]], linewidth=2)
             fig.canvas.draw()
             plt.imshow(cal_img, cmap="gray")
@@ -301,8 +291,10 @@ class Images:
             bclose.on_clicked(_close)
             plt.show()
 
+            # Estimate the dimension corresponding to the pixel resolution.
             self.pixel_dim = ref_length/np.sqrt(lx**2 + ly**2)
 
+            # If verbose, print some information.
             if verbose:
                 print("Points: ",point_a,point_b)
                 print("mm/pixel: ",self.pixel_dim)
@@ -330,10 +322,13 @@ class Images:
         **Output/Returns:**
         """
 
+        # x and y are global variables corresponding to the position 
+        # in the image where the mouse click is detected.
         global x, y
         x, y = event.xdata, event.ydata
 
         if event.button:
+            # Mark a circle where the mouse click is detected.
             circle = plt.Circle((event.xdata, event.ydata), rcirc, color='red')
             ax.add_patch(circle)
             fig.canvas.draw()  # this line was missing earlier
@@ -341,6 +336,7 @@ class Images:
         global coords
         coords.append((x, y))
 
+        # If two points are detected draw a rectangle where the points correspond to opposite corners.
         if len(coords) == 2:
             fig.canvas.mpl_disconnect(cid)
 
