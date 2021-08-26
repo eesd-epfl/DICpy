@@ -4,16 +4,25 @@
    contain the root `toctree` directive.
 
 Welcome to DICpy's documentation!
-=================================
+================================
+
+UQpy (Uncertainty Quantification with python) is a general purpose Python toolbox 
+for modeling uncertainty in physical and mathematical systems. The code is organized 
+as a set of modules centered around core capabilities in Uncertainty Quantification (UQ).
+
+
+.. _toc:
+
+Table of contents
+-----------------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
+	
+   installation_doc
+   DIC2Local_doc
+   Utils_doc
+   news_doc
 
 * :ref:`genindex`
 * :ref:`modindex`
