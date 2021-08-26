@@ -15,13 +15,13 @@ DICpy: digital image correlation with python
    :target: https://www.python.org/
 
 .. |PyPI download month| image:: https://img.shields.io/pypi/dm/ansicolortags.svg
-   :target: https://pypi.python.org/pypi/ansicolortags/
+   :target: https://pypi.org/project/DICpy/
 
 .. |PyPI version shields.io| image:: https://img.shields.io/pypi/v/ansicolortags.svg
-   :target: https://pypi.python.org/pypi/ansicolortags/
+   :target: https://pypi.org/project/DICpy/
 
 .. |Github all releases| image:: https://img.shields.io/github/downloads/Naereen/StrapDown.js/total.svg
-   :target: https://GitHub.com/Naereen/StrapDown.js/releases/)
+   :target: https://github.com/eesd-epfl/DICpy
 
 ====
 
