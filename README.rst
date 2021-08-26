@@ -14,7 +14,7 @@ DICpy: digital image correlation with python
 .. |made-with-python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
    :target: https://www.python.org/
 
-.. |PyPI download month| image:: https://img.shields.io/pypi/dm/ansicolortags.svg
+.. |PyPI download month| image:: https://badge.fury.io/py/DICpy.svg
    :target: https://pypi.org/project/DICpy/
 
 .. |PyPI version shields.io| image:: https://img.shields.io/pypi/v/ansicolortags.svg
