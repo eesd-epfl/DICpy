@@ -4,6 +4,12 @@ DICpy: digital image correlation with python
 
 |logo|
 
+.. ![plot](./logo.png)
+
+.. [![Pypi](https://badge.fury.io/py/DICpy.svg)](https://badge.fury.io/py/DICpy.svg)
+.. [![Downloads](https://pypip.in/download/DICpy/badge.svg)](https://pypi.python.org/DICpy/)
+.. |Plastic Badge| image:: https://badge.fury.io/py/DICpy.svg
+
 ====
 
 :Authors: Ketson R. M. dos Santos
