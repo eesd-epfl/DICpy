@@ -2,7 +2,20 @@
 DICpy: digital image correlation with python
 *******************************************************
 
-|logo|
+.. |logo|
+
+.. ![plot](./logo.png)
+
+.. [![Pypi](https://badge.fury.io/py/DICpy.svg)](https://badge.fury.io/py/DICpy.svg)
+.. [![Downloads](https://pypip.in/download/DICpy/badge.svg)](https://pypi.python.org/DICpy/)
+
+|version| |downloads_pypi|
+
+.. |version| image:: https://badge.fury.io/py/DICpy.svg
+    :target: https://badge.fury.io/py/DICpy
+    
+.. |downloads_pypi| image:: https://img.shields.io/pypi/dw/DICpy.svg
+    :target: https://img.shields.io/pypi/dw/DICpy
 
 ====
 
