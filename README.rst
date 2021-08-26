@@ -2,7 +2,7 @@
 DICpy: digital image correlation with python
 *******************************************************
 
-|logo|
+.. |logo|
 
 .. ![plot](./logo.png)
 
@@ -13,6 +13,11 @@ DICpy: digital image correlation with python
 
 .. |made-with-python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
    :target: https://www.python.org/
+   
+|PyPI download total|
+
+.. |PyPI download total| image:: https://img.shields.io/pypi/dt/ansicolortags.svg
+   :target: https://pypi.python.org/pypi/ansicolortags/
 
 ====
 
