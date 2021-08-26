@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>DimensionReduction &#8212; DICpy 0.1.2 documentation</title>
+    <title>DIC2D &#8212; DICpy 0.1.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -33,247 +33,68 @@
 
           <div class="body" role="main">
             
-  <section id="dimensionreduction">
-<span id="dimension-reduction-doc"></span><h1>DimensionReduction<a class="headerlink" href="#dimensionreduction" title="Permalink to this headline">¶</a></h1>
-<p>This module contains the classes and methods to perform the point-wise and multi point data-based dimensionality reduction via projection onto the Grassmann manifold and Diffusion Maps, respectively. Further, interpolation in the tangent space centered at a given point on the Grassmann manifold can be performed. In addition, dataset reconstruction and dimension reduction can be performed via the Proper Orthogonal Decomposition method and the Higher-order Singular Value Decomposition for solution snapshots in the form of second-order tensors.</p>
-<p>The module <code class="docutils literal notranslate"><span class="pre">UQpy.DimensionReduction</span></code> currently contains the following classes:</p>
+  <section id="dic2d">
+<span id="dic2local-doc"></span><h1>DIC2D<a class="headerlink" href="#dic2d" title="Permalink to this headline">¶</a></h1>
+<p>This module contains the classes and methods to perform the 2D digital image correlation given images
+Of the object under analysis at different instants.</p>
+<p>The module <code class="docutils literal notranslate"><span class="pre">DICpy.DIC2Local</span></code> currently contains the following classes:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">Grassmann</span></code>: Class for for analysis of samples on the Grassmann manifold.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DiffusionMaps</span></code>: Class for multi point data-based dimensionality reduction.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">POD</span></code>: Class for data reconstruction and data dimension reduction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RectangularMesh</span></code>: Class for the creation of mesh to perform local DIC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Analysis</span></code>: Class for performing the DIC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code>: Class for the calculation and visualization of strain fields.</p></li>
 </ul>
-<section id="grassmann">
-<h2>Grassmann<a class="headerlink" href="#grassmann" title="Permalink to this headline">¶</a></h2>
-<p>In differential geometry the Grassmann manifold <span class="math notranslate nohighlight">\(\mathcal{G}_{n,p}\)</span> refers to a collection of <span class="math notranslate nohighlight">\(p\)</span>-dimensional subspaces embedded in a <span class="math notranslate nohighlight">\(n\)</span>-dimensional vector space. The <code class="docutils literal notranslate"><span class="pre">Grassmann</span></code> class contains methods to perform the projection of matrices onto the Grassmann manifold via singular value decomposition (SVD), where their dimensionality are reduced. Further, a tangent space, where standard interpolation can be performed, is constructed at a given reference point. Therefore, the mapping from the Grassmann manifold to the tangent space and from the tangent space to the manifold are performed via the logarithmic and exponential mapping, respectively. Moreover, additional quantities such as the Karcher mean, which correspond to the point on the Grassmann manifold minimizing the squared distances to the other points on the same manifold. Further, the kernel defined on the Grassmann manifold is implemented to estimate an affinity matrix to be used in kernel-based machine learning techniques.</p>
-<p>A tangent space <span class="math notranslate nohighlight">\(\mathcal{T}_{\mathcal{X}}\mathcal{G}(p,n)\)</span>, which is a flat inner-product space, is defined as a set of all tangent vectors at <span class="math notranslate nohighlight">\(\mathcal{X}\)</span> <a class="footnote-reference brackets" href="#id13" id="id1">1</a>, <a class="footnote-reference brackets" href="#id14" id="id2">2</a>, <a class="footnote-reference brackets" href="#id15" id="id3">3</a>; such as</p>
+<section id="rectangularmesh">
+<h2>RectangularMesh<a class="headerlink" href="#rectangularmesh" title="Permalink to this headline">¶</a></h2>
+<p>Digital Image Correlation is a non-contact technique for measuring strain fields and deformations of materials using images. It is widely used in several fields such as civil engineering <a class="footnote-reference brackets" href="#id3" id="id1">1</a> and biomechanics <a class="footnote-reference brackets" href="#id4" id="id2">2</a>.</p>
+<p>The equation <span class="math notranslate nohighlight">\(\mathcal{T}\)</span>, which is a flat inner-product space, is defined as a set of all tangent vectors at <span class="math notranslate nohighlight">\(\mathcal{X}\)</span>; such as</p>
 <div class="math notranslate nohighlight">
-\[\mathcal{T}_{\mathcal{X}}\mathcal{G}(p,n) = \{\mathbf{\Gamma} \in \mathbb{R}^{n \times p} : \mathbf{\Gamma}^T\mathbf{\Psi}=\mathbf{0}\}\]</div>
-<p>Where a point <span class="math notranslate nohighlight">\(\mathcal{X} = \mathrm{span}\left(\mathbf{\Psi}\right) \in \mathcal{G}(p,n)\)</span> is invariant to the choice of basis such that <span class="math notranslate nohighlight">\(\mathrm{span}\left(\mathbf{\Psi}\right) = \mathrm{span}\left(\mathbf{R\Psi}\right)\)</span>, with <span class="math notranslate nohighlight">\(\mathbf{R} \in SO(p)\)</span>, where <span class="math notranslate nohighlight">\(SO(p)\)</span> is the special orthogonal group.</p>
-<p>One can write the exponential map (from the tangent space to the manifold) locally as (<a class="footnote-reference brackets" href="#id16" id="id4">4</a>, <a class="footnote-reference brackets" href="#id17" id="id5">5</a>)</p>
-<div class="math notranslate nohighlight">
-\[\mathrm{exp}_{\mathcal{X}_0}(\mathbf{\Gamma}) = \mathbf{\Psi}_1\]</div>
-<p>Denoting <span class="math notranslate nohighlight">\(\mathbf{\Gamma}\)</span> by its singular value decomposition <span class="math notranslate nohighlight">\(\mathbf{\Gamma} = \mathbf{U}\mathbf{S}\mathbf{V}^T\)</span> one can write a point on the Grassmann manifold <span class="math notranslate nohighlight">\(\mathbf{\Psi}_1\)</span>, considering a reference point <span class="math notranslate nohighlight">\(\mathbf{\Psi}_0\)</span>, as</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{\Psi}_1 = \mathrm{exp}_{\mathcal{X}_0}(\mathbf{U}\mathbf{S}\mathbf{V}^T) = \mathbf{\Psi}_0\mathbf{V}\mathrm{cos}\left(\mathbf{S}\right)\mathbf{Q}^T+\mathbf{U}\mathrm{sin}\left(\mathbf{S}\right)\mathbf{Q}^T\]</div>
-<p>Equivalently, the logarithmic map <span class="math notranslate nohighlight">\(\mathrm{log}_\mathcal{X}:\mathcal{G}(p,n) \rightarrow \mathcal{T}_{\mathcal{X}}\mathcal{G}(p,n)\)</span> is defined locally as</p>
-<div class="math notranslate nohighlight">
-\[\mathrm{log}_\mathcal{X}(\mathbf{\Psi}_1) = \mathbf{U}\mathrm{tan}^{-1}\left(\mathbf{S}\right)\mathbf{V}^T\]</div>
-<p>One can write the geodesic as</p>
-<div class="math notranslate nohighlight">
-\[\gamma(t)=\mathrm{span}\left[\left(\mathbf{\Psi}_0\mathbf{V}\mathrm{cos}(t\mathbf{S})+\mathbf{U}\mathrm{sin}(t\mathbf{S})\right)\mathbf{V}^T\right]\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathbf{\Psi}_0\)</span>, if <span class="math notranslate nohighlight">\(t=0\)</span>, and <span class="math notranslate nohighlight">\(\mathbf{\Psi}_1\)</span>, <span class="math notranslate nohighlight">\(t=1\)</span>.</p>
-<p>The geodesic distance <span class="math notranslate nohighlight">\(d_{\mathcal{G}(p,n)}\left(\mathbf{\Psi}_0,\mathbf{\Psi}_1\right)\)</span> between two points on $mathcal{G}(p,n)$ corresponds to the distance over the geodesic <span class="math notranslate nohighlight">\(\gamma(t)\)</span> and it is given by</p>
-<div class="math notranslate nohighlight">
-\[d_{\mathcal{G}(p,n)}\left(\mathbf{\Psi}_0,\mathbf{\Psi}_1\right) = ||\mathbf{\Theta}||_2\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathbf{\Theta} = \left(\theta_1, \theta_2, \dots, \theta_p \right)\)</span> contains the principal angles. Several definitions of distance on <span class="math notranslate nohighlight">\(\mathcal{G}(p,n)\)</span> can be found in the literature.</p>
-<p>In several applications the use of subspaces is essential to describe the underlying geometry of data. However, it is well-known that subspaces do not follow the Euclidean geometry because they lie on the Grassmann manifold. Therefore, working with subspaces requires the definition of an embedding structure of the Grassmann manifold into a Hilbert space. Thus, using positive definite kernels is studied as a solution to this problem. In this regard, a real-valued positive definite kernel is defined as a symmetric function <span class="math notranslate nohighlight">\(k:\mathcal{X}\times \mathcal{X} \rightarrow \mathbb{R}\)</span> if and only if <span class="math notranslate nohighlight">\(\sum^n_{I,j=1}c_i c_j k(x_i,x_j) \leq 0\)</span> for <span class="math notranslate nohighlight">\(n \in \mathbb{N}\)</span>, <span class="math notranslate nohighlight">\(x_i in \mathcal{X}\)</span> and <span class="math notranslate nohighlight">\(c_i \in \mathbb{R}\)</span>. Further, the Grassmann kernel can be defined as a function <span class="math notranslate nohighlight">\(k:\mathcal{G}(p,n)\times \mathcal{G}(p,n) \rightarrow \mathbb{R}\)</span> if it is well-defined and positive definite <a class="footnote-reference brackets" href="#id18" id="id6">6</a>.</p>
-<section id="grassmann-class-descriptions">
-<h3>Grassmann Class Descriptions<a class="headerlink" href="#grassmann-class-descriptions" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">Grassmann</span></code> class is imported using the following command:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DimensionReduction</span> <span class="kn">import</span> <span class="n">Grassmann</span>
+\[\mathcal{T}_{\mathcal{X}}.\]</div>
+<section id="rectangularmesh-class-descriptions">
+<h3>RectangularMesh Class Descriptions<a class="headerlink" href="#rectangularmesh-class-descriptions" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">RectangularMesh</span></code> class is imported using the following command:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DICpy.DIC2Local</span> <span class="kn">import</span> <span class="n">RectangularMesh</span>
 </pre></div>
 </div>
-<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">Grassmann</span></code></p>
+<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">RectangularMesh</span></code></p>
 </section>
 </section>
-<section id="diffusionmaps">
-<h2>DiffusionMaps<a class="headerlink" href="#diffusionmaps" title="Permalink to this headline">¶</a></h2>
-<p>In nonlinear dimensionality reduction Diffusion Maps corresponds to a technique used to reveal the intrinsic structure of data sets based on a diffusion process over the data. In particular, the eigenfunctions of Markov matrices defining a random walk on the data are used to obtain a coordinate system represented by the diffusion coordinates revealing the embedded geometry of the data. Moreover, the diffusion coordinates are defined on a Euclidean space where usual metrics define the distances between pairs of data points. Thus, the diffusion maps create a connection between the spectral properties of the diffusion process and the intrinsic geometry of the data resulting in a multiscale representation of the data.</p>
-<p>To present this method let’s assume measure space <span class="math notranslate nohighlight">\((X, \mathcal{A}, \mu)\)</span>, where <span class="math notranslate nohighlight">\(X\)</span> is the dataset, <span class="math notranslate nohighlight">\(\mathcal{A}\)</span> is a <span class="math notranslate nohighlight">\(\sigma-\)</span>, and <span class="math notranslate nohighlight">\(\mu\)</span> a measure; and a non-negative symmetric kernel <span class="math notranslate nohighlight">\(k: X \times X \rightarrow \mathbb{R}\)</span> representing the pairwise affinity of the data points in a symmetric graph; one can define the connectivity between two points as the transition probability in a random walk using the kernel <span class="math notranslate nohighlight">\(k\)</span>. Therefore, the diffusion maps technique can be based on a normalized graph Laplacian construction <a class="footnote-reference brackets" href="#id19" id="id7">7</a>, <a class="footnote-reference brackets" href="#id20" id="id8">8</a>, where</p>
-<div class="math notranslate nohighlight">
-\[p(x, y) = \frac{k(x,y)}{\int_X k(x,y)d\mu(y)}\]</div>
-<p>with</p>
-<div class="math notranslate nohighlight">
-\[\int_X p(x,y)d\mu(y) = 1\]</div>
-<p>can be viewed as the one-step transition probability . Therefore, to construct the transition probability one can resort to the graph Laplacian normalization. In this regard, one can consider that <span class="math notranslate nohighlight">\(L_{i,j} = k(x_i,x_j)\)</span> must be normalized such that <span class="math notranslate nohighlight">\(\tilde{L}_{i,j} = D^{-\alpha}LD^{-\alpha}\)</span>, where</p>
-<p>is a diagonal matrix. Next, a new matrix $D$ is obtained from <span class="math notranslate nohighlight">\(\tilde{L}\)</span>, thus</p>
-<div class="math notranslate nohighlight">
-\[\tilde{D}_{i,i} = \sum_j \tilde{L}_{i,j}\]</div>
-<p>Therefore, the transition probability <span class="math notranslate nohighlight">\(M_{i,j} = p(x_j,t|x_i)\)</span> can be obtained after the graph Laplacian normalization of <span class="math notranslate nohighlight">\(\tilde{L}\)</span> such as</p>
-<div class="math notranslate nohighlight">
-\[M = \tilde{D}^{-1}\tilde{L}\]</div>
-<p>From the eigendecomposition of <span class="math notranslate nohighlight">\(M\)</span>, one can obtain the eigenvectors <span class="math notranslate nohighlight">\((\psi_0, \psi_1, \dots, \psi_N)\)</span> and their respective eigenvalues <span class="math notranslate nohighlight">\((\lambda_0, \lambda_1, \dots, \lambda_N)\)</span>. However, only <span class="math notranslate nohighlight">\(k\)</span> eigenvectors and eigenvalues suffice. Thus, the diffusion coordinates are given by <span class="math notranslate nohighlight">\(\Psi_i = \lambda_i \psi_i\)</span> with <span class="math notranslate nohighlight">\(i=1,\dots,k\)</span>.</p>
-<section id="diffusion-maps-class-descriptions">
-<h3>Diffusion Maps Class Descriptions<a class="headerlink" href="#diffusion-maps-class-descriptions" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">DiffusionMaps</span></code> class is imported using the following command:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DimensionReduction</span> <span class="kn">import</span> <span class="n">DiffusionMaps</span>
+<section id="analysis">
+<h2>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h2>
+<p>The Class <code class="docutils literal notranslate"><span class="pre">Analysis</span></code> is used to run the analysis with pixel and sub-pixel resolution.</p>
+<section id="analysis-class-descriptions">
+<h3>Analysis Class Descriptions<a class="headerlink" href="#analysis-class-descriptions" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Analysis</span></code> class is imported using the following command:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DICpy.DIC2Local</span> <span class="kn">import</span> <span class="n">Analysis</span>
 </pre></div>
 </div>
-<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">DiffusionMaps</span></code></p>
+<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">Analysis</span></code></p>
 </section>
 </section>
-<section id="pod">
-<h2>POD<a class="headerlink" href="#pod" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">POD</span></code> class is the parent class of the <code class="docutils literal notranslate"><span class="pre">DirectPOD</span></code>, <code class="docutils literal notranslate"><span class="pre">SnapshotPOD</span></code> and <code class="docutils literal notranslate"><span class="pre">HOSVD</span></code> classes that perform the Direct POD, Snapshot POD and Higher-order Singular Value Decomposition (HOSVD) respectively.</p>
-<p>The Proper Orthogonal Decomposition (POD) is a post-processing technique which takes a given dataset and extracts a set of orthogonal basis functions and the corresponding coefficients. The idea of this method, is to analyze large amounts of data in order to gain a better understanding of the simulated processes and reduce noise. POD method has two variants, the Direct POD and Snapshot POD. In cases where the dataset is large, the Snapshot POD is recommended as it is much faster.</p>
-<p>The Higher-order Singular Value Decomposition (HOSVD) is the generalization of the matrix SVD, also called an orthogonal Tucker decomposition. HOSVD is used in cases where the solution snapshots are most naturally condensed into generalized matrices (tensors) and do not lend themselves naturally to vectorization.</p>
-<section id="pod-class-descriptions">
-<h3>POD Class Descriptions<a class="headerlink" href="#pod-class-descriptions" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">POD</span></code> class is imported using the following command:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DimensionReduction</span> <span class="kn">import</span> <span class="n">POD</span>
+<section id="postprocessing">
+<h2>PostProcessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code> class is used to estimate and visualize the strain fields.</p>
+<section id="postprocessing-class-descriptions">
+<h3>PostProcessing Class Descriptions<a class="headerlink" href="#postprocessing-class-descriptions" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code> class is imported using the following command:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DICpy.DIC2Local</span> <span class="kn">import</span> <span class="n">PostProcessing</span>
 </pre></div>
 </div>
-<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">POD</span></code></p>
-<section id="directpod">
-<h4>DirectPOD<a class="headerlink" href="#directpod" title="Permalink to this headline">¶</a></h4>
-<p>The Direct Proper Orthogonal Decomposition (POD) is the first variant of the POD method and is used for the extraction of a set of orthogonal spatial basis functions and corresponding time coefficients from a dataset. The <code class="docutils literal notranslate"><span class="pre">DirectPOD</span></code> class is used for dimensionality reduction of datasets obtained by numerical simulations, given a desired level of accuracy.</p>
-<p>Let us consider the solution of a numerical model of a differential equation <span class="math notranslate nohighlight">\(\mathbf{u}(\mathtt{x},t)\)</span>, where <span class="math notranslate nohighlight">\(\mathtt{x} = (x,y,z)\)</span> is the position vector where the function is evaluated and <span class="math notranslate nohighlight">\(t\)</span> is the time. The idea behind the POD is to decompose the random vector field <span class="math notranslate nohighlight">\(\mathbf{u}(\mathtt{x},t)\)</span>, into a set of deterministic spatial functions <span class="math notranslate nohighlight">\(\Phi_{k}{\mathtt{x}}\)</span>, multiplied by random time coefficients <span class="math notranslate nohighlight">\(\alpha_{k}(t)\)</span>, so that:</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{u}(\mathtt{x},t) =  \sum_{k=1}^{\infty}\alpha_{k}(t)\Phi_{k}{\mathtt{x}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\Phi_{k}{\mathtt{x}}\)</span> are the spatial POD modes and <span class="math notranslate nohighlight">\(\alpha_{k}(t)\)</span> are the time coefficients.</p>
-<p>The above decomposition is achieved by maximizing the energy that can be captured by the first <span class="math notranslate nohighlight">\(n\)</span> spatial POD modes <a class="footnote-reference brackets" href="#id21" id="id9">9</a>. POD modes are orthonormal and thus one can write</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\iiint_{\mathtt{x}} \Phi_{k_{1}}{\mathtt{x}} \Phi_{k_{2}}{\mathtt{x}} d\mathtt{x} = \begin{cases}
-  1, &amp; \text{if $k_1 = k_2$}.\\
-  0, &amp; \text{if $k_1 \ne k_2$}
-\end{cases}\end{split}\]</div>
-<p>Furthermore, at each time coefficient <span class="math notranslate nohighlight">\(\alpha_{k}(t)\)</span> only depends on the spatial mode <span class="math notranslate nohighlight">\(\Phi_{k}{\mathtt{x}}\)</span>. By multiplying the decomposition equation with <span class="math notranslate nohighlight">\(\Phi_{k}{\mathtt{x}}\)</span> and integrating over space one obtains the following</p>
-<div class="math notranslate nohighlight">
-\[\alpha_{k}(t) = \iiint_{\mathtt{x}} \mathbf{u}(\mathtt{x},t) \Phi_{k}{\mathtt{x}} d\mathtt{x}\]</div>
-<p>The POD method, often called Principal Component Analysis (PCA) in the field of statistics, is traditionally applied to datasets obtained by numerical simulations for engineering problems (e.g. fluid mechanics, mechanics of materials, aerodynamics) which produce finite-dimensional data containing the evolution of problem solutions in time.</p>
-<p>For the Direct POD method, a two-dimensional dataset <span class="math notranslate nohighlight">\(\mathbf{U}\)</span> is constructed where the <span class="math notranslate nohighlight">\(m\)</span> is the number of snapshots and <span class="math notranslate nohighlight">\(n\)</span> is the number of problem dimensions. The covariance matrix is computed as follows</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{C} = \frac{1}{m-1} \mathbf{U}^T \mathbf{U}\]</div>
-<p>Next, the eigenvalue problem is solved for the covariance matrix as</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{C} \Phi = \lambda \Phi\]</div>
-<p>In total, <span class="math notranslate nohighlight">\(n\)</span> eigenvalues <span class="math notranslate nohighlight">\(\lambda_1,... \lambda_n\)</span> and a corresponding set of eigenvectors, arranged as columns in an <span class="math notranslate nohighlight">\(n \times n\)</span> matrix <span class="math notranslate nohighlight">\(\Phi\)</span>. The <span class="math notranslate nohighlight">\(n\)</span> columns of this matrix are the proper orthogonal modes of the dataset. The original snapshot matrix <span class="math notranslate nohighlight">\(\mathbf{U}\)</span>, can be expressed as the sum of the contributions of the <span class="math notranslate nohighlight">\(n\)</span> deterministic modes. The temporal coefficients are calculated as <span class="math notranslate nohighlight">\(A = \mathbf{U} \Phi\)</span>. A predefined number of <span class="math notranslate nohighlight">\(k\)</span> POD spatial modes (eigenvectors) and temporal coefficients can be considered for the reconstruction of data as follows</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{\sim{u}}(\mathtt{x},t) =  \sum_{i=1}^{k}A(t)\Phi{\mathtt{x}}\]</div>
-</section>
-</section>
-<section id="directpod-class-descriptions">
-<h3>DirectPOD Class Descriptions<a class="headerlink" href="#directpod-class-descriptions" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">DirectPOD</span></code> class is imported using the following command:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DimensionReduction</span> <span class="kn">import</span> <span class="n">DirectPOD</span>
-</pre></div>
-</div>
-<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">DirectPOD</span></code></p>
-<section id="snapshotpod">
-<h4>SnapshotPOD<a class="headerlink" href="#snapshotpod" title="Permalink to this headline">¶</a></h4>
-<p>The Snapshot Proper Orthogonal Decomposition (POD) method is the second variant of the POD method which considers the decomposition of a dataset into deterministic temporal modes and random spatial coefficients. Essentially, this method interchanges the time and position. In most problems the number of solution snapshots <span class="math notranslate nohighlight">\(n\)</span> is less than the number of dimensions <span class="math notranslate nohighlight">\(m = N_x \times N_y\)</span> where <span class="math notranslate nohighlight">\(N_x, N_y\)</span> are the grid dimensions. Thus, by using the <code class="docutils literal notranslate"><span class="pre">SnapshotPOD</span></code> class one can reconstruct solutions much faster <a class="footnote-reference brackets" href="#id22" id="id10">10</a>.</p>
-<p>For the Snapshot POD the covariance matrix <span class="math notranslate nohighlight">\(\mathbf{C_s}\)</span>, is calculated as follows</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{C_s} = \frac{1}{m-1} \mathbf{U} \mathbf{U}^T\]</div>
-<p>The eigenvalue problem is solved and the temporal modes (eigenvectors) are calculated as</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{C} A_s = \lambda A_s\]</div>
-<p>Spatial coefficients are therefore calculated as <span class="math notranslate nohighlight">\(\Phi_s = \mathbf{U}^T A_s\)</span>. Finally, a predefined number of <span class="math notranslate nohighlight">\(k\)</span>-POD temporal modes and spatial coefficients can be considered for the reconstruction of data as follows</p>
-<div class="math notranslate nohighlight">
-\[\mathbf{\sim{u}}(\mathtt{x},t) = \sum_{i=1}^{k} A_s(t) \Phi_s \mathtt{x}\]</div>
-</section>
-</section>
-<section id="snapshotpod-class-descriptions">
-<h3>SnapshotPOD Class Descriptions<a class="headerlink" href="#snapshotpod-class-descriptions" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">SnapshotPOD</span></code> class is imported using the following command:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DimensionReduction</span> <span class="kn">import</span> <span class="n">SnapshotPOD</span>
-</pre></div>
-</div>
-<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">SnapshotPOD</span></code></p>
-</section>
-</section>
-<section id="hosvd">
-<h2>HOSVD<a class="headerlink" href="#hosvd" title="Permalink to this headline">¶</a></h2>
-<p>The Higher-order Singular Value Decomposition is a generalization of the classical SVD. Instead of vectorizing the solution snapshot into two-dimensional matrices we instead perform the dimension reduction directly to the generalized matrix, namely a  tensor. Let <span class="math notranslate nohighlight">\(A \in \mathbb{R}^{I_1 \times I_2 \times ,..,\times I_N}\)</span> be an input Nth-order tensor containing the solution snapshots from a numerical simulation. The HOSVD decomposes <span class="math notranslate nohighlight">\(A\)</span> as</p>
-<div class="math notranslate nohighlight">
-\[A = S \times_1 \mathbf{U}^{(1)} \times_2 \mathbf{U}^{(2)}...\times_N \mathbf{U}^{(N)}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\times_N\)</span> denotes an n-mode tensor-matrix product.</p>
-<p>By the above equation and the commutative property of n-mode product, one can obtain the
-following relation</p>
-<div class="math notranslate nohighlight">
-\[S = A \times_1 {\mathbf{U}^{(1)}}^{T} ...\times_N {\mathbf{U}^{(N)}}^{T}\]</div>
-<p>By using the properties of the n-mode product together with the definitions of Kronecker product, one can compute the n-mode unfolding of <span class="math notranslate nohighlight">\(A\)</span> as</p>
-<div class="math notranslate nohighlight">
-\[A_{n} = \mathbf{U}^{(n)} S_{n} (\mathbf{U}^{(n+1)} \otimes \cdot\cdot\cdot \otimes \mathbf{U}^{(N)} \otimes \mathbf{U}^{(1)} \otimes \cdot\cdot\cdot \otimes \mathbf{U}^{(n-1)})^T\]</div>
-<p>The ordering and orthogonality properties of <span class="math notranslate nohighlight">\(S\)</span> imply that <span class="math notranslate nohighlight">\(S(n)\)</span> has mutually orthogonal rows with Frobenius norms equal to <span class="math notranslate nohighlight">\(\sigma_1^{n},\sigma_2^{n},...,\sigma_{I_n}^{n}\)</span>. Since the right and left resulting matrices in the above equation are both orthogonal the following can be defined</p>
-<div class="math notranslate nohighlight">
-\[\Sigma^{(n)} = \text{diag}(\sigma_1^{n},\sigma_2^{n},...,\sigma_{I_n}^{n})\]</div>
-<p>Classical SVD must be performed to the unfolded matrices as</p>
-<div class="math notranslate nohighlight">
-\[A = \mathbf{U}^{(n)} \Sigma^{(n)} {\mathbf{V}^{(n)}}^T\]</div>
-<p>The HOSVD provides a set of bases <span class="math notranslate nohighlight">\(\mathbf{U}^{(1)},...,\mathbf{U}^{(N-1)}\)</span> spanning each dimension of the snapshots plus a basis, <span class="math notranslate nohighlight">\(\mathbf{U}^{(N)}\)</span>, spanning across the snapshots and the orthogonal core tensor, which generalizes the matrix of singular values. Finally, the reconstructed tensor can be computed as follows</p>
-<div class="math notranslate nohighlight">
-\[W(\xi_{k}) = \Sigma \times_1 \mathbf{U}^{(1)} \times_2 \mathbf{U}^{(2)} \cdot\cdot\cdot \times_N \mathbf{U}^{(N)}( \xi_{k})\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathbf{U}(N))( \xi_{k})\)</span> has dimension <span class="math notranslate nohighlight">\(n \times 1\)</span>, where n is the number of snapshots and corresponds to the kth column of <span class="math notranslate nohighlight">\(\mathbf{U}(N)\)</span> and is the number of independent bases that account for the desired accuracy of the reconstruction.</p>
-<p>More information can be found in <a class="footnote-reference brackets" href="#id23" id="id11">11</a>, <a class="footnote-reference brackets" href="#id24" id="id12">12</a>.</p>
-<section id="hosvd-class-descriptions">
-<h3>HOSVD Class Descriptions<a class="headerlink" href="#hosvd-class-descriptions" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">HOSVD</span></code> class is imported using the following command:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">DimensionReduction</span> <span class="kn">import</span> <span class="n">HOSVD</span>
-</pre></div>
-</div>
-<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">HOSVD</span></code></p>
+<p>One can use the following command to instantiate the class <code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code></p>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 <dl class="footnote brackets">
-<dt class="label" id="id13"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><ol class="upperalpha simple" start="10">
-<li><p>Maruskin, Introduction to Dynamical Systems and Geometric Mechanics, Solar Crest Publishing, LLC, 2012:p.165.</p></li>
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><ol class="upperalpha simple">
+<li><p>Rezaie, R. Achanta, M. Godio, K. Beyer, Comparison of crack segmentation using digital image correlation measurements and deep learning, Construction and Building Materials, 2020:p.120474.</p></li>
 </ol>
 </dd>
-<dt class="label" id="id14"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
-<dd><ol class="upperalpha simple" start="2">
-<li><p>Wang, Y. Hu, J. Gao, Y. Sun, B. Yin, Low rank represen6tation on Grassmann   manifolds: An extrinsic perspective, 2015, 167arXiv:1504.01807.168.</p></li>
-</ol>
-</dd>
-<dt class="label" id="id15"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
-<dd><ol class="upperalpha simple" start="19">
-<li><p>Sommer, T. Fletcher, X. Pennec, 1 - introduction to differential and Riemannian  geometry, in: X. Pennec, S. Sommer, T. Fletcher (Eds.), Riemannian Geometric Statistics in Medical Image Analysis, Academic Press, 2020, p.3–37.</p></li>
-</ol>
-</dd>
-<dt class="label" id="id16"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
 <dd><ol class="upperalpha simple" start="4">
-<li><p>Giovanis, M. Shields, Uncertainty  quantification for complex systems with very high dimensional response using Grassmann manifold variations, Journal of Computational Physics, 2018, 364, p.393–415.</p></li>
-</ol>
-</dd>
-<dt class="label" id="id17"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
-<dd><ol class="upperalpha simple" start="2">
-<li><p>Wang, Y. Hu, J. Gao, Y. Sun, B. Yin, Low rank representation on Grassmann manifolds: An extrinsic perspective, 2015, 167arXiv:1504.01807.</p></li>
-</ol>
-</dd>
-<dt class="label" id="id18"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
-<dd><ol class="upperalpha simple" start="13">
-<li><ol class="upperalpha simple" start="20">
-<li><p>Harandi, M. Salzmann, S. Jayasumana, R. Hartley, H. Li, Expanding the family of Grassmannian kernels: An embedding perspective, 2014, 1622014.arXiv:1407.1123.</p></li>
+<li><ol class="upperalpha simple" start="19">
+<li><p>Zhang, D. D. Arola, Applications of digital image correlation to biological tissues, 2004, Journal of Biomedical Optics.</p></li>
 </ol>
 </li>
-</ol>
-</dd>
-<dt class="label" id="id19"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
-<dd><ol class="upperalpha simple" start="18">
-<li><ol class="upperalpha simple" start="18">
-<li><p>Coifman, S. Lafon. Diffusion maps. Applied Computational Harmonic Analysis, 2006, 21(1), p.5–30.</p></li>
-</ol>
-</li>
-</ol>
-</dd>
-<dt class="label" id="id20"><span class="brackets"><a class="fn-backref" href="#id8">8</a></span></dt>
-<dd><ol class="upperalpha simple" start="18">
-<li><ol class="upperalpha simple" start="18">
-<li><p>Coifman, I. G. Kevrekidis, S. Lafon, M. Maggioni, and B. Nadler, Diffusionmaps, reduction coordinates, and low dimensional representation of stochastic systems, Multiscale Modeling and Simulation, 2008, 7(2), p.842–864.</p></li>
-</ol>
-</li>
-</ol>
-</dd>
-<dt class="label" id="id21"><span class="brackets"><a class="fn-backref" href="#id9">9</a></span></dt>
-<dd><ol class="upperalpha simple" start="10">
-<li><p>Weiss. A tutorial on the proper orthogonal decomposition. In: AIAA Aviation 2019 Forum. 2019. p. 3333.</p></li>
-</ol>
-</dd>
-<dt class="label" id="id22"><span class="brackets"><a class="fn-backref" href="#id10">10</a></span></dt>
-<dd><ol class="upperalpha simple" start="12">
-<li><p>Sirovich. Turbulence and the dynamics of coherent structures. I. Coherent structures. Quarterly of applied mathematics, 1987, 45(3), 561-571.</p></li>
-</ol>
-</dd>
-<dt class="label" id="id23"><span class="brackets"><a class="fn-backref" href="#id11">11</a></span></dt>
-<dd><ol class="upperalpha simple" start="4">
-<li><p>Giovanis, M. Shields. Variance‐based simplex stochastic collocation with model order reduction for high‐dimensional systems. International Journal for Numerical Methods in Engineering, 2019, 117(11), 1079-1116.</p></li>
-</ol>
-</dd>
-<dt class="label" id="id24"><span class="brackets"><a class="fn-backref" href="#id12">12</a></span></dt>
-<dd><ol class="upperalpha simple" start="12">
-<li><p>De Lathauwer, B. De Moor, J. Vandewalle. A multilinear singular value decomposition. SIAM journal on Matrix Analysis and Applications, 2000, 21(4), 1253-1278.</p></li>
 </ol>
 </dd>
 </dl>
@@ -301,11 +122,10 @@ following relation</p>
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">DimensionReduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#grassmann">Grassmann</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#diffusionmaps">DiffusionMaps</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pod">POD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#hosvd">HOSVD</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DIC2D</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rectangularmesh">RectangularMesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#postprocessing">PostProcessing</a></li>
 </ul>
 </li>
 </ul>
