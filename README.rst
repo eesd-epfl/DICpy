@@ -13,6 +13,10 @@ DICpy: digital image correlation with python
 
 .. |version| image:: https://badge.fury.io/py/DICpy.svg
     :target: https://badge.fury.io/py/DICpy
+    
+.. |version| image:: https://badge.fury.io/py/DICpy.svg
+    :target: https://img.shields.io/pypi/dw/DICpy
+   
 
 ====
 
