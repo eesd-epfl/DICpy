@@ -9,7 +9,10 @@ DICpy: digital image correlation with python
 .. [![Pypi](https://badge.fury.io/py/DICpy.svg)](https://badge.fury.io/py/DICpy.svg)
 .. [![Downloads](https://pypip.in/download/DICpy/badge.svg)](https://pypi.python.org/DICpy/)
 
-.. |Plastic Badge| image:: https://badge.fury.io/py/DICpy.svg
+|made-with-python|
+
+.. |made-with-python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
+   :target: https://www.python.org/
 
 ====
 
