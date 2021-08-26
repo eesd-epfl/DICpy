@@ -14,8 +14,8 @@ DICpy: digital image correlation with python
 .. |version| image:: https://badge.fury.io/py/DICpy.svg
     :target: https://badge.fury.io/py/DICpy
     
-.. |downloads_pypi| image:: https://img.shields.io/pypi/dm/DICpy.svg
-    :target: https://img.shields.io/pypi/dm/DICpy
+.. |downloads_pypi| image:: https://img.shields.io/pypi/dw/DICpy.svg
+    :target: https://img.shields.io/pypi/dw/DICpy
    
 
 ====
