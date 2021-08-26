@@ -9,14 +9,20 @@ DICpy: digital image correlation with python
 .. [![Pypi](https://badge.fury.io/py/DICpy.svg)](https://badge.fury.io/py/DICpy.svg)
 .. [![Downloads](https://pypip.in/download/DICpy/badge.svg)](https://pypi.python.org/DICpy/)
 
-|made-with-python| |PyPI download month|
+|made-with-python| |PyPI download month| |PyPI version shields.io| |Github all releases|
 
 .. |made-with-python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
    :target: https://www.python.org/
    
 
-.. |PyPI download month| image:: https://img.shields.io/pypi/dm/ansicolortags.svg
+.. |PyPI download month| image:: https://badge.fury.io/py/DICpy.svg
    :target: https://pypi.python.org/pypi/ansicolortags/
+
+.. |PyPI version shields.io| image:: https://img.shields.io/pypi/v/ansicolortags.svg
+   :target: https://pypi.python.org/pypi/ansicolortags/
+
+.. |Github all releases| image:: https://img.shields.io/github/downloads/Naereen/StrapDown.js/total.svg
+   :target: https://GitHub.com/Naereen/StrapDown.js/releases/)
 
 ====
 
