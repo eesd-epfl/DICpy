@@ -7,9 +7,11 @@ import pkg_resources
 
 import DICpy.DIC2Local
 import DICpy.PreProcessing
+import DICpy.Simulation
 import DICpy.Utils
 from DICpy.DIC2Local import *
 from DICpy.PreProcessing import *
+from DICpy.Simulation import *
 from DICpy.Utils import *
 
 try:
