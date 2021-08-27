@@ -1,5 +1,5 @@
-from DICpy.Utils import *
-from DICpy.Utils import _close, _correlation
+from DICpy.utils import *
+from DICpy.utils import _close, _correlation
 import numpy as np
 import scipy as sp
 from scipy.interpolate import RectBivariateSpline
