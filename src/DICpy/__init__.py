@@ -5,14 +5,15 @@ DICpy: digital imahe correlation with python
 
 import pkg_resources
 
-import DICpy.DIC2Local
-import DICpy.PreProcessing
-import DICpy.Simulation
-import DICpy.Utils
-from DICpy.DIC2Local import *
-from DICpy.PreProcessing import *
-from DICpy.Simulation import *
-from DICpy.Utils import *
+import DICpy.dic2d.local
+import DICpy.pre_processing
+import DICpy.synthetic
+import DICpy.utils
+
+from DICpy.dic2d.local import *
+from DICpy.pre_processing import *
+from DICpy.synthetic import *
+from DICpy.utils import *
 
 try:
     __version__ = pkg_resources.get_distribution("DICpy").version
