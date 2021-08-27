@@ -323,6 +323,7 @@ class Analysis:
             - 'Crude': crude method based on the image oversampling.
             - 'gradient': gradient based sub-pixel refining.
             - 'coarse_fine': method based on the sequential refining of the pixel domain.
+            - 'lukas_kanade': method based on the Lukas-Kanade optical flow.
 
         * **oversampling_x** (`int`)
             Oversampling in the x dimension used when 'Crude' method is adopted, default is 1 (equal to 'crude').
@@ -341,8 +342,11 @@ class Analysis:
         xp = self.mesh_obj.xp
         yp = self.mesh_obj.yp
 
-        u = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
-        v = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
+        #u = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
+        #v = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
+
+        u = []
+        v = []
 
         usum = np.zeros((self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
         vsum = np.zeros((self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
@@ -353,79 +357,126 @@ class Analysis:
             img_0 = images[k]
             img_1 = images[k + 1]
 
-            # Loop over the elements.
-            c = 0
-            centers = []
-            for i in range(self.mesh_obj.ny - 1):
-                for j in range(self.mesh_obj.nx - 1):
-                    l_x = abs(xp[i + 1, j + 1] - xp[i, j])
-                    l_y = abs(yp[i + 1, j + 1] - yp[i, j])
-                    xc = (xp[i + 1, j + 1] + xp[i, j]) / 2
-                    yc = (yp[i + 1, j + 1] + yp[i, j]) / 2
-                    centers.append((xc, yc))
+            if sub_pixel == 'lucas_kanade':
 
-                    gap_x = int(max(np.ceil(l_x / 3), 3))
-                    gap_y = int(max(np.ceil(l_y / 3), 3))
+                centers = []
+                positions = []
+                lx_list = []
+                ly_list = []
+                for i in range(self.mesh_obj.ny - 1):
+                    for j in range(self.mesh_obj.nx - 1):
+                        positions.append([i, j])
+                        l_x = abs(xp[i + 1, j + 1] - xp[i, j])
+                        l_y = abs(yp[i + 1, j + 1] - yp[i, j])
+                        xc = (xp[i + 1, j + 1] + xp[i, j]) / 2
+                        yc = (yp[i + 1, j + 1] + yp[i, j]) / 2
+                        centers.append(np.array([np.float32(xc), np.float32(yc)]))
+                        lx_list.append(l_x)
+                        ly_list.append(l_y)
 
-                    xtem_0 = xp[i, j] + gap_x
-                    ytem_0 = yp[i, j] + gap_y
-                    xtem_1 = xp[i + 1, j + 1] - gap_x
-                    ytem_1 = yp[i + 1, j + 1] - gap_y
+                l_x = np.max(lx_list)
+                l_y = np.max(ly_list)
+                centers = np.array(centers)
+                positions = np.array(positions)
 
-                    window_x = abs(xtem_1 - xtem_0) + 1
-                    window_y = abs(ytem_1 - ytem_0) + 1
+                lk_params = dict(winSize=(l_x, l_y), maxLevel=10,
+                                 criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
 
-                    ptem = (ytem_0, xtem_0)
-                    psearch = (yp[i, j], xp[i, j])
+                final_positions, st, err = cv2.calcOpticalFlowPyrLK(img_0, img_1, centers, None, **lk_params)
 
-                    img_template = get_template_left(im_source=img_0, point=ptem, sidex=window_x, sidey=window_y)
-                    img_search = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
+                #print(final_positions - centers)
+                u0 = np.zeros((self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
+                v0 = np.zeros((self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
+                for i in range(len(final_positions)):
+                    ii = positions[i, 0]
+                    jj = positions[i, 1]
+                    u0[ii, jj] = final_positions[i, 0] - centers[i, 0]
+                    v0[ii, jj] = final_positions[i, 1] - centers[i, 1]
 
-                    if sub_pixel is None:
-                        px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
-                        px = int(px)
-                        py = int(py)
-                    elif sub_pixel == 'crude':
-                        px, py = self.template_match_sk(img_search, img_template, mlx=oversampling_x,
-                                                        mly=oversampling_y)
-                    elif sub_pixel == 'gradient':
-                        px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
-                        px = int(px)
-                        py = int(py)
-                        ff = get_template_left(im_source=img_0, point=psearch, sidex=l_x, sidey=l_y)
-                        gg = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
-                        delta = self._grad_subpixel(f=ff, g=gg, gap_x=gap_x, gap_y=gap_y, p_corner=(py, px))
+                usum = usum + (u0 * self.pixel_dim)
+                vsum = vsum + (v0 * self.pixel_dim)
 
-                        px = px + delta[0]
-                        py = py + delta[1]
-                    elif sub_pixel == 'coarse_fine':
-                        px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
-                        px = int(px)
-                        py = int(py)
-                        pval = (py, px)
+                u.append(usum)
+                v.append(vsum)
 
-                        img_u = get_template_left(im_source=img_0, point=ptem, sidex=window_x, sidey=window_y)
+            else:
 
-                        delta = self._coarse_fine(img_u=img_u, img_search=img_search, n=niter, pval=pval,
-                                                  window_x=window_x, window_y=window_y)
+                # Loop over the elements.
+                c = 0
+                centers = []
+                for i in range(self.mesh_obj.ny - 1):
+                    for j in range(self.mesh_obj.nx - 1):
+                        l_x = abs(xp[i + 1, j + 1] - xp[i, j])
+                        l_y = abs(yp[i + 1, j + 1] - yp[i, j])
+                        xc = (xp[i + 1, j + 1] + xp[i, j]) / 2
+                        yc = (yp[i + 1, j + 1] + yp[i, j]) / 2
+                        centers.append((xc, yc))
 
-                        px = px + delta[0]
-                        py = py + delta[1]
+                        gap_x = int(max(np.ceil(l_x / 3), 3))
+                        gap_y = int(max(np.ceil(l_y / 3), 3))
 
-                    else:
-                        raise NotImplementedError('DICpy: not recognized method.')
+                        xtem_0 = xp[i, j] + gap_x
+                        ytem_0 = yp[i, j] + gap_y
+                        xtem_1 = xp[i + 1, j + 1] - gap_x
+                        ytem_1 = yp[i + 1, j + 1] - gap_y
 
-                    u0 = px - gap_x
-                    v0 = py - gap_y
+                        window_x = abs(xtem_1 - xtem_0) + 1
+                        window_y = abs(ytem_1 - ytem_0) + 1
 
-                    usum[i, j] = usum[i, j] + (u0 * self.pixel_dim)
-                    vsum[i, j] = vsum[i, j] + (v0 * self.pixel_dim)
+                        ptem = (ytem_0, xtem_0)
+                        psearch = (yp[i, j], xp[i, j])
 
-                    u[k, i, j] = usum[i, j]
-                    v[k, i, j] = vsum[i, j]
+                        img_template = get_template_left(im_source=img_0, point=ptem, sidex=window_x, sidey=window_y)
+                        img_search = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
 
-        self.u = u
-        self.v = v
+                        if sub_pixel is None:
+                            px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
+                            px = int(px)
+                            py = int(py)
+                        elif sub_pixel == 'crude':
+                            px, py = self.template_match_sk(img_search, img_template, mlx=oversampling_x,
+                                                            mly=oversampling_y)
+                        elif sub_pixel == 'gradient':
+                            px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
+                            px = int(px)
+                            py = int(py)
+                            ff = get_template_left(im_source=img_0, point=psearch, sidex=l_x, sidey=l_y)
+                            gg = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
+                            delta = self._grad_subpixel(f=ff, g=gg, gap_x=gap_x, gap_y=gap_y, p_corner=(py, px))
+
+                            px = px + delta[0]
+                            py = py + delta[1]
+                        elif sub_pixel == 'coarse_fine':
+                            px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
+                            px = int(px)
+                            py = int(py)
+                            pval = (py, px)
+
+                            img_u = get_template_left(im_source=img_0, point=ptem, sidex=window_x, sidey=window_y)
+
+                            delta = self._coarse_fine(img_u=img_u, img_search=img_search, n=niter, pval=pval,
+                                                      window_x=window_x, window_y=window_y)
+
+                            px = px + delta[0]
+                            py = py + delta[1]
+
+                        else:
+                            raise NotImplementedError('DICpy: not recognized method.')
+
+                        u0 = px - gap_x
+                        v0 = py - gap_y
+
+                        usum[i, j] = usum[i, j] + (u0 * self.pixel_dim)
+                        vsum[i, j] = vsum[i, j] + (v0 * self.pixel_dim)
+
+                        #u[k, i, j] = usum[i, j]
+                        #v[k, i, j] = vsum[i, j]
+
+                u.append(usum)
+                v.append(vsum)
+
+        self.u = np.array(u)
+        self.v = np.array(v)
 
     def _coarse_fine(self, img_u=None, img_search=None, n=None, pval=None, window_x=None, window_y=None):
 
