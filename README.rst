@@ -71,7 +71,7 @@ In order to uninstall it
 
                         pip uninstall DICpy
 
-Using Conda
+.. Using Conda
 
             * ::
 
