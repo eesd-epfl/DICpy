@@ -1,12 +1,8 @@
-# DICpy: Utilities used on all the classes of DICpy.
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 def _correlation(f, g):
-    # Private class for the correlation between data stored in f and in g. 
-    
     m_f = np.mean(f)
     m_g = np.mean(g)
 
@@ -15,24 +11,19 @@ def _correlation(f, g):
 
     return corr
 
+
 def _mouse_click(event):
-    # Private class to capture the coordinates of the mouse after clicking in a region of the image.
-    
-    # The coordinates x and y are stored as global coordinates.
     global x, y
     x, y = event.xdata, event.ydata
 
-    # Once the click is detected, a circle is created on the image.
     if event.button:
         circle = plt.Circle((event.xdata, event.ydata), rcirc, color='red')
         ax.add_patch(circle)
         fig.canvas.draw()  # this line was missing earlier
 
-    # Store the coordinates x and y,    
     global coords
     coords.append((x, y))
-    #print(x, y)
-    # Draw a rectangle considering two points as the opposite coorners of a rectangle.
+    print(x, y)
     if len(coords) == 2:
         fig.canvas.mpl_disconnect(cid)
 
@@ -48,6 +39,7 @@ def _mouse_click(event):
         plt.close()
 
     return coords
+
 
 def get_template(im_source=None, center=None, side=None):
     # Crop image (im_source) to get a square patch (im_template) with center in
@@ -75,13 +67,13 @@ def get_template(im_source=None, center=None, side=None):
 def get_template_left(im_source=None, point=None, sidex=None, sidey=None):
     # Crop image (im_source) to get a square patch (im_template) with center in
     # (center_row, center_col) with width (in pixels) given as an argument.
-    #if not isinstance(sidex, int):
+    # if not isinstance(sidex, int):
     #    raise ValueError('pyCrack: side must be an integer!')
 
-    #if not isinstance(sidey, int):
+    # if not isinstance(sidey, int):
     #    raise ValueError('pyCrack: side must be an integer!')
 
-    #else:
+    # else:
     p_row = point[0]
     p_col = point[1]
     row_0 = p_row
@@ -97,12 +89,17 @@ def get_template_left(im_source=None, point=None, sidex=None, sidey=None):
 
     return im_template
 
+
 def _close(event):
-    # Close event (e.g., click).
     plt.close()
 
+
 def pad(model_script, model_object_name, sample, dict_kwargs=None):
-    # todo: test for parallel processing.
+    """
+    Execute the python model in parallel
+    :param sample: One sample point where the model has to be evaluated
+    :return:
+    """
 
     exec('from ' + model_script[:-3] + ' import ' + model_object_name)
     # if kwargs is not None:
