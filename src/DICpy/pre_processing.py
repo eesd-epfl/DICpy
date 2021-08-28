@@ -1,4 +1,4 @@
-from DICpy.utils import _close
+from DICpy_.utils import _close
 import numpy as np
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
