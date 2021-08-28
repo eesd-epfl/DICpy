@@ -4,7 +4,6 @@ DICpy: digital imahe correlation with python
 """
 
 import pkg_resources
-
 import DICpy.dic2d
 import DICpy.pre_processing
 import DICpy.synthetic
