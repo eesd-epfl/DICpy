@@ -33,7 +33,7 @@ Documentation
 ================
 
 Website:
-           https://....readthedocs.io
+           https://dicpy.readthedocs.io/
 
 Dependencies
 ===========
@@ -71,7 +71,7 @@ In order to uninstall it
 
                         pip uninstall DICpy
 
-Using Conda
+.. Using Conda
 
             * ::
 
