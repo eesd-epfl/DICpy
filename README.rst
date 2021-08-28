@@ -33,7 +33,7 @@ Documentation
 ================
 
 Website:
-           https://....readthedocs.io
+           http://dicpy.rtfd.io/
 
 Dependencies
 ===========
