@@ -89,7 +89,7 @@ class RectangularMesh:
 
         * **ny** (`int`)
             Number of nodes in the y direction (rows), default 2.
-            
+
         * **show_grid** (`int`)
             This functionality is only available when `point_a` and `point_b` are provided.
             When `noplot` is True, the grid is not plotted for express calculations.
@@ -274,12 +274,6 @@ class RectangularMesh:
         return coords
 
 
-########################################################################################################################
-########################################################################################################################
-#                                               2D Analysis                                                            #
-########################################################################################################################
-########################################################################################################################
-
 class Analysis:
     """
     This class contains the methods for the DIC analysis.
@@ -342,8 +336,8 @@ class Analysis:
         xp = self.mesh_obj.xp
         yp = self.mesh_obj.yp
 
-        #u = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
-        #v = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
+        # u = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
+        # v = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
 
         u = []
         v = []
@@ -374,6 +368,17 @@ class Analysis:
                         lx_list.append(l_x)
                         ly_list.append(l_y)
 
+                        # gap_x = int(max(np.ceil(l_x / 3), 3))
+                        # gap_y = int(max(np.ceil(l_y / 3), 3))
+
+                        # xtem_0 = xp[i, j] + gap_x
+                        # ytem_0 = yp[i, j] + gap_y
+                        # xtem_1 = xp[i + 1, j + 1] - gap_x
+                        # ytem_1 = yp[i + 1, j + 1] - gap_y
+
+                        # window_x = abs(xtem_1 - xtem_0) + 1
+                        # window_y = abs(ytem_1 - ytem_0) + 1
+
                 l_x = np.max(lx_list)
                 l_y = np.max(ly_list)
                 centers = np.array(centers)
@@ -384,7 +389,7 @@ class Analysis:
 
                 final_positions, st, err = cv2.calcOpticalFlowPyrLK(img_0, img_1, centers, None, **lk_params)
 
-                #print(final_positions - centers)
+                # print(final_positions - centers)
                 u0 = np.zeros((self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
                 v0 = np.zeros((self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
                 for i in range(len(final_positions)):
@@ -469,8 +474,8 @@ class Analysis:
                         usum[i, j] = usum[i, j] + (u0 * self.pixel_dim)
                         vsum[i, j] = vsum[i, j] + (v0 * self.pixel_dim)
 
-                        #u[k, i, j] = usum[i, j]
-                        #v[k, i, j] = vsum[i, j]
+                        # u[k, i, j] = usum[i, j]
+                        # v[k, i, j] = vsum[i, j]
 
                 u.append(usum)
                 v.append(vsum)
@@ -515,9 +520,9 @@ class Analysis:
         x = np.arange(px, px + window_x)
         y = np.arange(py, py + window_y)
 
-        #plt.close()
-        #plt.figure(111)
-        #plt.imshow(img_u)
+        # plt.close()
+        # plt.figure(111)
+        # plt.imshow(img_u)
 
         img_0 = img_u
 
@@ -763,12 +768,6 @@ class Analysis:
         return px, py
 
 
-########################################################################################################################
-########################################################################################################################
-#                                             Visualization                                                            #
-########################################################################################################################
-########################################################################################################################
-
 class PostProcessing:
     """
     This class contains the methods for visualizing the results of the DIC analysis.
@@ -923,10 +922,13 @@ class PostProcessing:
         """
 
         if step < 0:
-            raise ValueError("pyCrack: step must be larger than or equal to 0.")
+            raise ValueError("DICpy: `step` must be larger than or equal to 0.")
+
+        if step > len(self.analysis_obj.u):
+            raise ValueError("DICpy: `step` cannot be larger than the number of steps in the analysis.")
 
         if not isinstance(step, int):
-            raise TypeError("pyCrack: step must be an integer.")
+            raise TypeError("DICpy: step must be an integer.")
 
         point_a = self.mesh_obj.point_a
         point_b = self.mesh_obj.point_b

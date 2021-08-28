@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import skimage.io as sio
 from matplotlib.widgets import Button
+import cv2
 
 
 class Images:
@@ -113,10 +114,12 @@ class Images:
             if verbose:
                 print(f)
 
-            im = sio.imread(os.path.join(path, f), as_gray=True)
+            #im = sio.imread(os.path.join(path, f), as_gray=True)
+            im = cv2.imread(os.path.join(path, f), 0)
 
-            images.append(255 * im)
-            images_normalized.append(im)
+            images.append(im)
+            #images.append(np.asarray(255 * im, dtype=np.uint8))
+            images_normalized.append(im/255)
 
         self.images = images
         self.images_normalized = images_normalized
