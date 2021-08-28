@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='DICpy',
-    version="0.1.2",
+    version="0.2.1",
     url='https://github.com/eesd-epfl/DICpy',
     description="Digital Image Correlation with Python.",
     author="Ketson R. M. dos Santos",
