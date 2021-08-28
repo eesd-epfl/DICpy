@@ -949,8 +949,8 @@ class PostProcessing:
             v = v_[step - 1, :, :]
 
         e11 = self.strain11[step, :, :]
-        e12 = self.strain11[step, :, :]
-        e21 = self.strain11[step, :, :]
+        e12 = self.strain12[step, :, :]
+        e21 = self.strain21[step, :, :]
         e22 = self.strain22[step, :, :]
 
         if results == 'u':
