@@ -336,9 +336,6 @@ class Analysis:
         xp = self.mesh_obj.xp
         yp = self.mesh_obj.yp
 
-        #u = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
-        #v = np.zeros((num_img - 1, self.mesh_obj.ny - 1, self.mesh_obj.nx - 1))
-
         u = []
         v = []
 
@@ -367,17 +364,6 @@ class Analysis:
                         centers.append(np.array([np.float32(xc), np.float32(yc)]))
                         lx_list.append(l_x)
                         ly_list.append(l_y)
-
-                        #gap_x = int(max(np.ceil(l_x / 3), 3))
-                        #gap_y = int(max(np.ceil(l_y / 3), 3))
-
-                        #xtem_0 = xp[i, j] + gap_x
-                        #ytem_0 = yp[i, j] + gap_y
-                        #xtem_1 = xp[i + 1, j + 1] - gap_x
-                        #ytem_1 = yp[i + 1, j + 1] - gap_y
-
-                        #window_x = abs(xtem_1 - xtem_0) + 1
-                        #window_y = abs(ytem_1 - ytem_0) + 1
 
                 l_x = np.max(lx_list)
                 l_y = np.max(ly_list)

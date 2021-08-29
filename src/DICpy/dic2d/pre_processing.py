@@ -154,7 +154,7 @@ class Images:
             path = os.getcwd()
 
         if file_name is None:
-            raise TypeError('DICpy: file_names cannot be NoneType.')
+            raise TypeError('DICpy: file_name cannot be NoneType.')
 
         if verbose:
             print('DICpy: reading the calibration image.')

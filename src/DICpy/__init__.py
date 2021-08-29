@@ -6,13 +6,11 @@ DICpy: digital imahe correlation with python
 import pkg_resources
 
 import DICpy.dic2d
-import DICpy.pre_processing
-import DICpy.synthetic
+import DICpy.dic3d
 import DICpy.utils
 
 from DICpy.dic2d import *
-from DICpy.pre_processing import *
-from DICpy.synthetic import *
+from DICpy.dic3d import *
 from DICpy.utils import *
 
 try:
