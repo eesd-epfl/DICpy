@@ -3,6 +3,7 @@ import numpy as np
 import copy
 from DICpy.math4dic import gradient, interpolate_template
 from DICpy.dic2d.image_registration import ImageRegistration
+from scipy.interpolate import RectBivariateSpline
 
 
 class GradientZero(ImageRegistration):
@@ -151,6 +152,14 @@ class GradientZero(ImageRegistration):
         # using Sobel.
         gx, gy = gradient(g, k=7)
 
+        # Interpolants.
+        dim = np.shape(g)
+        x0 = np.arange(0, dim[1])
+        y0 = np.arange(0, dim[0])
+        interp_g = RectBivariateSpline(y0, x0, g)
+        interp_gx = RectBivariateSpline(y0, x0, gx)
+        interp_gy = RectBivariateSpline(y0, x0, gy)
+
         # Crop the searching areas in f and g, for the correlated points.
         gx_crop = get_template_left(im_source=gx, point=p_corner, sidex=window_x, sidey=window_y)
         gy_crop = get_template_left(im_source=gy, point=p_corner, sidex=window_x, sidey=window_y)
@@ -193,9 +202,12 @@ class GradientZero(ImageRegistration):
             # todo: adjust convention.
             x = np.linspace(p_corner[1], p_corner[1] + window_x, window_x)
             y = np.linspace(p_corner[0], p_corner[0] + window_y, window_y)
-            g_crop = interpolate_template(f=g, x=x, y=y)
-            gx_crop = interpolate_template(f=gx, x=x, y=y)
-            gy_crop = interpolate_template(f=gy, x=x, y=y)
+            # g_crop = interpolate_template(f=g, x=x, y=y)
+            # gx_crop = interpolate_template(f=gx, x=x, y=y)
+            # gy_crop = interpolate_template(f=gy, x=x, y=y)
+            g_crop = interpolate_template(f=interp_g, x=x, y=y, dim=dim)
+            gx_crop = interpolate_template(f=interp_gx, x=x, y=y, dim=dim)
+            gy_crop = interpolate_template(f=interp_gy, x=x, y=y, dim=dim)
 
             niter += 1
 

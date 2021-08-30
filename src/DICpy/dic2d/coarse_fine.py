@@ -3,6 +3,7 @@ from DICpy.utils import _correlation
 import numpy as np
 from DICpy.math4dic import interpolate_template
 from DICpy.dic2d.image_registration import ImageRegistration
+from scipy.interpolate import RectBivariateSpline
 
 
 class CoarseFine(ImageRegistration):
@@ -148,6 +149,11 @@ class CoarseFine(ImageRegistration):
 
         img_0 = img_u
 
+        dim = np.shape(img_search)
+        x0 = np.arange(0, dim[1])
+        y0 = np.arange(0, dim[0])
+        interp_img = RectBivariateSpline(y0, x0, img_search)
+
         r0 = -0.5
         r1 = 0.5
         c0 = -0.5
@@ -170,7 +176,8 @@ class CoarseFine(ImageRegistration):
                     yc = (row[i] + row[i + 1]) / 2 + yc0 * 0
                     xc = (col[j] + col[j + 1]) / 2 + xc0 * 0
                     center.append((xc, yc))
-                    img_1 = interpolate_template(f=img_search, x=x, y=y, dx=xc, dy=yc)
+                    # img_1 = interpolate_template(f=img_search, x=x, y=y, dx=xc, dy=yc)
+                    img_1 = interpolate_template(f=interp_img, x=x, y=y, dx=xc, dy=yc, dim=dim)
                     c = _correlation(img_0, img_1)
                     corr.append(c)
                     posi.append((row[i], col[j]))

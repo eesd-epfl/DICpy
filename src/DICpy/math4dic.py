@@ -31,7 +31,7 @@ def norm_xcorr(f, g):
     return c
 
 
-def interpolate_template(f=None, x=None, y=None, dx=0, dy=0):
+def interpolate_template2(f=None, x=None, y=None, dx=0, dy=0):
     """
     Method of interpolation.
 
@@ -74,6 +74,56 @@ def interpolate_template(f=None, x=None, y=None, dx=0, dy=0):
 
     return z
 
+
+def interpolate_template(f=None, x=None, y=None, dx=0, dy=0, dim=None):
+    """
+    Method of interpolation.
+
+    **Input:**
+    * **f** (`ndarray`)
+        Source image.
+
+    * **x** (`ndarray`)
+        Integer pixel position in the x direction.
+
+    * **y** (`ndarray`)
+        Integer pixel position in the y direction.
+
+    * **dx** (`float`)
+        Sub-pixel increment in the x direction.
+
+    * **dy** (`float`)
+        Sub-pixel increment in the y direction.
+
+    **Output/Returns:**
+    * **z** (`ndarray`)
+        Interpolated image.
+    """
+
+    if not isinstance(f, RectBivariateSpline):
+        dim = np.shape(f)
+        ly = dim[0]
+        lx = dim[1]
+
+        x0 = np.arange(0, lx)
+        y0 = np.arange(0, ly)
+
+        interp_spline = RectBivariateSpline(y0, x0, f)
+
+    else:
+        ly = dim[0]
+        lx = dim[1]
+        interp_spline = f
+
+    xt = x + dx
+    yt = y + dy
+
+    z = np.zeros((len(yt), len(xt)))
+    for i in range(len(yt)):
+        for j in range(len(xt)):
+            z[i, j] = interp_spline(yt[i], xt[j])
+
+    return z
 
 def gradient(img, k):
     """
