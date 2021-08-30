@@ -10,6 +10,8 @@ import cv2
 from skimage.feature import match_template
 from sklearn.gaussian_process import GaussianProcessRegressor
 
+from DICpy.math4dic import gradient, interpolate_template
+
 
 class RectangularMesh:
     """
@@ -397,46 +399,42 @@ class Analysis:
                 centers = []
                 for i in range(self.mesh_obj.ny - 1):
                     for j in range(self.mesh_obj.nx - 1):
-                        l_x = abs(xp[i + 1, j + 1] - xp[i, j])
-                        l_y = abs(yp[i + 1, j + 1] - yp[i, j])
-                        xc = (xp[i + 1, j + 1] + xp[i, j]) / 2
-                        yc = (yp[i + 1, j + 1] + yp[i, j]) / 2
+                        l_x = abs(xp[i + 1, j + 1] - xp[i, j])  # searching area.
+                        l_y = abs(yp[i + 1, j + 1] - yp[i, j])  # searching area.
+                        xc = (xp[i + 1, j + 1] + xp[i, j]) / 2  # center searching area.
+                        yc = (yp[i + 1, j + 1] + yp[i, j]) / 2  # center searching area.
                         centers.append((xc, yc))
 
-                        gap_x = int(max(np.ceil(l_x / 3), 3))
-                        gap_y = int(max(np.ceil(l_y / 3), 3))
+                        gap_x = int(max(np.ceil(l_x / 3), 3))  # default gap: 1/3.
+                        gap_y = int(max(np.ceil(l_y / 3), 3))  # default gap: 1/3
 
-                        xtem_0 = xp[i, j] + gap_x
-                        ytem_0 = yp[i, j] + gap_y
-                        xtem_1 = xp[i + 1, j + 1] - gap_x
-                        ytem_1 = yp[i + 1, j + 1] - gap_y
+                        xtem_0 = xp[i, j] + gap_x  # x coordinate of the top right (template).
+                        ytem_0 = yp[i, j] + gap_y  # y coordinate of the top right (template).
+                        xtem_1 = xp[i + 1, j + 1] - gap_x  # x coordinate of the bottom left (template).
+                        ytem_1 = yp[i + 1, j + 1] - gap_y  # x coordinate of the bottom left (template).
 
-                        window_x = abs(xtem_1 - xtem_0) + 1
-                        window_y = abs(ytem_1 - ytem_0) + 1
+                        window_x = abs(xtem_1 - xtem_0) + 1  # size x (columns) template.
+                        window_y = abs(ytem_1 - ytem_0) + 1  # size y (rows) template.
 
-                        ptem = (ytem_0, xtem_0)
-                        psearch = (yp[i, j], xp[i, j])
+                        ptem = (ytem_0, xtem_0)  # top right coordinate of the template for the matching processing.
+                        psearch = (yp[i, j], xp[i, j])  # top right coordinate of the searching area for matching.
 
+                        # Image of the template.
                         img_template = get_template_left(im_source=img_0, point=ptem, sidex=window_x, sidey=window_y)
+
+                        # Image of the searching area.
                         img_search = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
 
                         if sub_pixel is None:
+                            # No subpixel resolution required.
                             px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
                             px = int(px)
                             py = int(py)
                         elif sub_pixel == 'crude':
+                            # Crude method: use oversampling. This method has an inferior computational performance.
                             px, py = self.template_match_sk(img_search, img_template, mlx=oversampling_x,
                                                             mly=oversampling_y)
-                        elif sub_pixel == 'gradient':
-                            px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
-                            px = int(px)
-                            py = int(py)
-                            ff = get_template_left(im_source=img_0, point=psearch, sidex=l_x, sidey=l_y)
-                            gg = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
-                            delta = self._grad_subpixel(f=ff, g=gg, gap_x=gap_x, gap_y=gap_y, p_corner=(py, px))
 
-                            px = px + delta[0]
-                            py = py + delta[1]
                         elif sub_pixel == 'coarse_fine':
                             px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
                             px = int(px)
@@ -450,6 +448,49 @@ class Analysis:
 
                             px = px + delta[0]
                             py = py + delta[1]
+
+                        elif sub_pixel == 'gradient':
+                            # Simple gradient based method.
+
+                            # Integer location.
+                            px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
+                            px = int(px)
+                            py = int(py)
+
+                            # Crop the searching areas for both images (sequential images).
+                            ff = get_template_left(im_source=img_0, point=psearch, sidex=l_x, sidey=l_y)
+                            gg = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
+
+                            # subpixel estimation.
+                            delta = self._grad_subpixel(f=ff, g=gg, gap_x=gap_x, gap_y=gap_y, p_corner=(py, px))
+
+                            px = px + delta[0]
+                            py = py + delta[1]
+
+                        elif sub_pixel == 'affine':
+                            # shape function with affine transformation.
+                            px, py = self.template_match_sk(img_search, img_template, mlx=1, mly=1)
+                            px = int(px)
+                            py = int(py)
+
+                            ff = get_template_left(im_source=img_0, point=psearch, sidex=l_x, sidey=l_y)
+                            gg = get_template_left(im_source=img_1, point=psearch, sidex=l_x, sidey=l_y)
+
+                            xx = np.arange(xtem_0, xtem_1) + px
+                            yy = np.arange(ytem_0, ytem_1) + py
+                            XX, YY = np.meshgrid(xx, yy)
+                            fg = ff - gg
+                            gx, gy = derivatives(gg)
+
+                            print(np.shape(XX), np.shape(ff), (l_y, l_x))
+                            #print(np.sum(gx * fg))
+                            #print(np.sum(gx * XX * fg))
+
+
+                            #delta = self._grad_subpixel(f=ff, g=gg, gap_x=gap_x, gap_y=gap_y, p_corner=(py, px))
+
+                            #px = px + delta[0]
+                            #py = py + delta[1]
 
                         else:
                             raise NotImplementedError('DICpy: not recognized method.')
@@ -554,51 +595,6 @@ class Analysis:
 
         return delta
 
-    @staticmethod
-    def interpolate_template(f=None, x=None, y=None, dx=None, dy=None):
-
-        """
-        Method of interpolation.
-
-        **Input:**
-        * **f** (`ndarray`)
-            Source image.
-
-        * **x** (`ndarray`)
-            Integer pixel position in the x direction.
-
-        * **y** (`ndarray`)
-            Integer pixel position in the y direction.
-
-        * **dx** (`float`)
-            Sub-pixel increment in the x direction.
-
-        * **dy** (`float`)
-            Sub-pixel increment in the y direction.
-
-        **Output/Returns:**
-        * **z** (`ndarray`)
-            Interpolated image.
-        """
-
-        ly, lx = np.shape(f)
-        # Regularly-spaced, coarse grid
-        x0 = np.arange(0, lx)
-        y0 = np.arange(0, ly)
-        # X, Y = np.meshgrid(x, y)
-
-        interp_spline = RectBivariateSpline(y0, x0, f)
-
-        xt = x + dx
-        yt = y + dy
-
-        z = np.zeros((len(yt), len(xt)))
-        for i in range(len(yt)):
-            for j in range(len(xt)):
-                z[i, j] = interp_spline(yt[i], xt[j])
-
-        return z
-
     def _grad_subpixel(self, f=None, g=None, gap_x=None, gap_y=None, p_corner=None):
 
         """
@@ -633,34 +629,44 @@ class Analysis:
         xtem_1 = lx - gap_x
         ytem_1 = ly - gap_y
 
-        # Local: in the searching area.
+        # ptem: top left corner of the template in the reference image.
+        # p_corner: displaced top left corner after the integer registration.
         ptem = (ytem_0, xtem_0)
 
         window_x = abs(xtem_1 - xtem_0) + 1
         window_y = abs(ytem_1 - ytem_0) + 1
 
-        # using Sobel.
-        gx = cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=7)
-        gy = cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=7)
-        # gx, gy = self._gradient(g)
+        # Initially g and f are images of the searching are for both un-deformed and deformed images.
+        # derivatives.
+        gx, gy = gradient(g, k=7)
 
-        gx = get_template_left(im_source=gx, point=p_corner, sidex=window_x, sidey=window_y)
-        gy = get_template_left(im_source=gy, point=p_corner, sidex=window_x, sidey=window_y)
-        f = get_template_left(im_source=f, point=ptem, sidex=window_x, sidey=window_y)
-        g = get_template_left(im_source=g, point=p_corner, sidex=window_x, sidey=window_y)
+        # Crop images and the gradient.
+        gx_crop = get_template_left(im_source=gx, point=p_corner, sidex=window_x, sidey=window_y)
+        gy_crop = get_template_left(im_source=gy, point=p_corner, sidex=window_x, sidey=window_y)
+        f_crop = get_template_left(im_source=f, point=ptem, sidex=window_x, sidey=window_y)
+        g_crop = get_template_left(im_source=g, point=p_corner, sidex=window_x, sidey=window_y)
 
-        fg = f - g
+        p_corner = np.array(p_corner)
 
-        a11 = np.sum(gx ** 2)
-        a22 = np.sum(gy ** 2)
-        a12 = np.sum(gx * gy)
+        for i in range(1):
 
-        c1 = np.sum(fg * gx)
-        c2 = np.sum(fg * gy)
+            fg_crop = f_crop - g_crop
 
-        Ainv = np.linalg.inv(np.array([[a11, a12], [a12, a22]]))
-        C = np.array([c1, c2])
-        delta = Ainv @ C
+            a11 = np.sum(gx_crop ** 2)
+            a22 = np.sum(gy_crop ** 2)
+            a12 = np.sum(gx_crop * gy_crop)
+
+            c1 = np.sum(fg_crop * gx_crop)
+            c2 = np.sum(fg_crop * gy_crop)
+
+            Ainv = np.linalg.inv(np.array([[a11, a12], [a12, a22]]))
+            C = np.array([c1, c2])
+            delta = Ainv @ C
+
+            p_corner[0] = p_corner[0] + delta[0]
+            p_corner[1] = p_corner[1] + delta[1]
+
+            # f_ = interpolate_template(f=f, x=None, y=None, dx=delta[0], dy=delta[1])
 
         return delta
 
