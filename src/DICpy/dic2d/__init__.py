@@ -5,6 +5,7 @@ from DICpy.dic2d.lucas_kanade import *
 from DICpy.dic2d.image_registration import *
 from DICpy.dic2d.coarse_fine import *
 from DICpy.dic2d.gradient_zero import *
+from DICpy.dic2d.gradient_one import *
 from DICpy.dic2d.synthetic import *
 
 

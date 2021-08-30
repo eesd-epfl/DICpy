@@ -49,6 +49,39 @@ class CoarseFine(ImageRegistration):
 
     def _registration(self, img_0, img_1, psearch, ptem, lengths, windows, gaps):
 
+        """
+        Private method for estimating the displacements using image registration techniques.
+
+        **Input:**
+        * **img_0** (`ndarray`)
+            Image in time t.
+
+        * **img_1** (`ndarray`)
+            Image in time t + dt.
+
+        * **psearch** (`tuple`)
+            Upper left corner of the searching area.
+
+        * **ptem** (`tuple`)
+            Point containing the upper left corner of the template.
+
+        * **lengths** (`tuple`)
+            Lengths in x and y of the searching area (length_x, length_y).
+
+        * **windows** (`tuple`)
+            Lengths in x and y of the template (window_x, window_y).
+
+        * **gaps** (`tuple`)
+            Gaps between template and searching area (gap_x, gap_y).
+
+        **Output/Returns:**
+        * **px** (`float`)
+            Displacement in x (columns).
+
+        * **px** (`float`)
+            Displacement in y (rows).
+        """
+
         l_x = lengths[0]
         l_y = lengths[1]
         window_x = windows[0]
