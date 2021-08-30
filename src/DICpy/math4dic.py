@@ -5,6 +5,20 @@ import cv2
 
 
 def norm_xcorr(f, g):
+    """
+    Normalized cross correlation.
+
+    **Input:**
+    * **f** (`ndarray`)
+        Image.
+
+    * **g** (`ndarray`)
+        Image.
+
+    **Output/Returns:**
+    * **c** (`float`)
+        Correlation.
+    """
     mean_f = np.mean(f)
     mean_g = np.mean(g)
 
@@ -62,6 +76,23 @@ def interpolate_template(f=None, x=None, y=None, dx=0, dy=0):
 
 
 def gradient(img, k):
+    """
+    Estimage the gradient of images using Sobel filters from OpenCV-Python.
+
+    **Input:**
+    * **img** (`ndarray`)
+        Image.
+
+    * **k** (`ndarray`)
+        Order of approximation.
+
+    **Output/Returns:**
+    * **gx** (`ndarray`)
+        Derivative in x (columns).
+
+    * **gy** (`ndarray`)
+        Derivative in y (rows).
+    """
     gx = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=k)
     gy = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=k)
 
@@ -69,6 +100,26 @@ def gradient(img, k):
 
 
 def derivatives(img1, img2=None):
+    """
+    First order derivatives in x, y, and time (for two images).
+
+    **Input:**
+    * **img1** (`ndarray`)
+        Image in time t.
+
+    * **img2** (`ndarray`)
+        Image in time t + dt.
+
+    **Output/Returns:**
+    * **gx** (`ndarray`)
+        Derivative in x (columns) for img1.
+
+    * **gy** (`ndarray`)
+        Derivative in y (rows) for img1.
+
+    * **gt** (`ndarray`)
+        Derivative in time for img1 (optiional).
+    """
     # Derivatives
     kernel_x = np.array([[-1., 1.], [-1., 1.]])
     kernel_y = np.array([[-1., -1.], [1., 1.]])
