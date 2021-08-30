@@ -4,7 +4,20 @@ from scipy.interpolate import RectBivariateSpline
 import cv2
 
 
-def interpolate_template(f=None, x=None, y=None, dx=None, dy=None):
+def norm_xcorr(f, g):
+    mean_f = np.mean(f)
+    mean_g = np.mean(g)
+
+    sum_fg = np.sum((f - mean_f) * (g - mean_g))
+    sum_f2 = np.sum((f - mean_f) ** 2)
+    sum_g2 = np.sum((g - mean_g) ** 2)
+
+    c = sum_fg / np.sqrt(sum_f2 * sum_g2)
+
+    return c
+
+
+def interpolate_template(f=None, x=None, y=None, dx=0, dy=0):
     """
     Method of interpolation.
 
