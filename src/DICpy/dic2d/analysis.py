@@ -139,7 +139,7 @@ class Analysis:
                         centers.append((xc, yc))
 
                         gap_x = int(max(np.ceil(l_x / 3), 3))  # default gap: 1/3.
-                        gap_y = int(max(np.ceil(l_y / 3), 3))  # default gap: 1/3
+                        gap_y = int(max(np.ceil(l_y / 3), 3))  # default gap: 1/3.
 
                         xtem_0 = xp[i, j] + gap_x  # x coordinate of the top right (template).
                         ytem_0 = yp[i, j] + gap_y  # y coordinate of the top right (template).
