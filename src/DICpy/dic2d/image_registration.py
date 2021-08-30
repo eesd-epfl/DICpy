@@ -6,7 +6,9 @@ from skimage.feature import match_template
 
 class ImageRegistration:
     """
-    This class contains the methods for the DIC analysis.
+    This class has the methods to perform the DIC analysis without considering the subpixel resolution.
+    This is a parent class for children classes implementing methods with subpixel resolution.
+
     **Input:**
     * **mesh_obj** (`object`)
         Object of the RectangularMesh class.

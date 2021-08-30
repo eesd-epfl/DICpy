@@ -5,7 +5,8 @@ from DICpy.dic2d.image_registration import ImageRegistration
 
 class LucasKanade(ImageRegistration):
     """
-    DIC with subpixel resolution using the Lucas-Kanade algorithm implemented in OpenCV-Python.
+    DIC with subpixel resolution using the Lucas-Kanade algorithm implemented in OpenCV-Python, and It is a child class
+    of `ImageRegistration`.
 
     **Input:**
     * **mesh_obj** (`object`)

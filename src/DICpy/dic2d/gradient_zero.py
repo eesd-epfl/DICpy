@@ -10,7 +10,8 @@ from DICpy.dic2d.image_registration import ImageRegistration
 
 class GradientZero(ImageRegistration):
     """
-    DIC with subpixel resolution using the Lucas-Kanade algorithm implemented in OpenCV-Python.
+    DIC with subpixel resolution using gradients. This class implement a method using zeroth order shape functions, and
+    It is a child class of `ImageRegistration`.
 
     **Input:**
     * **mesh_obj** (`object`)
@@ -39,7 +40,6 @@ class GradientZero(ImageRegistration):
         self.mesh_obj = mesh_obj
         self.u = None
         self.v = None
-        self.niter = niter
 
         super().__init__(mesh_obj=mesh_obj)
 

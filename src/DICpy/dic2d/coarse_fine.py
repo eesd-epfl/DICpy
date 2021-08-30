@@ -7,7 +7,7 @@ from DICpy.dic2d.image_registration import ImageRegistration
 
 class CoarseFine(ImageRegistration):
     """
-    DIC with subpixel resolution using an coarse-fine search approach.
+    DIC with subpixel resolution using an coarse-fine search approach, and It is a child class of `ImageRegistration`.
 
     This method is presented in the following paper:
     "An advanced coarse-fine search approach for digital image correlation applications."
@@ -30,6 +30,9 @@ class CoarseFine(ImageRegistration):
 
     * **v** (`ndarray`)
         Displacements in the y (rows) dimension at the center of each cell.
+
+    * **niter** (`int`)
+    Number of iterations in the coarse-fine algorithm.
 
     **Methods:**
     """
