@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from DICpy.dic2d.ImageRegistration import ImageRegistration
+from DICpy.DIC_2D._image_registration import ImageRegistration
 
 
 class LucasKanade(ImageRegistration):

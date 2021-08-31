@@ -2,7 +2,7 @@ from DICpy.utils import *
 import numpy as np
 import copy
 from DICpy.math4dic import gradient, interpolate_template
-from DICpy.dic2d.ImageRegistration import ImageRegistration
+from DICpy.DIC_2D._image_registration import ImageRegistration
 from scipy.interpolate import RectBivariateSpline
 
 
@@ -32,12 +32,14 @@ class GradientZero(ImageRegistration):
     **Methods:**
     """
 
-    def __init__(self, mesh_obj=None):
+    def __init__(self, mesh_obj=None, max_iter=20, tol=1e-3):
 
         self.pixel_dim = mesh_obj.images_obj.pixel_dim
         self.mesh_obj = mesh_obj
         self.u = None
         self.v = None
+        self.max_iter = max_iter
+        self.tol = tol
 
         super().__init__(mesh_obj=mesh_obj)
 
@@ -107,8 +109,7 @@ class GradientZero(ImageRegistration):
 
         return px, py
 
-    @staticmethod
-    def _grad_subpixel(f=None, g=None, gap_x=None, gap_y=None, p_corner=None):
+    def _grad_subpixel(self, f=None, g=None, gap_x=None, gap_y=None, p_corner=None):
         """
         Private method from the paper: Application of an improved subpixel registration algorithm on digital speckle
         correlation measurement.
@@ -149,10 +150,7 @@ class GradientZero(ImageRegistration):
         window_x = abs(xtem_1 - xtem_0) + 1
         window_y = abs(ytem_1 - ytem_0) + 1
 
-        # First order derivatives.
-        gx, gy = gradient(g, k=7)
-
-        # second order derivatives.
+        # using Sobel.
         gx, gy = gradient(g, k=7)
 
         # Interpolants.
@@ -176,8 +174,8 @@ class GradientZero(ImageRegistration):
         # Initiate the update of the parameters of the shape function.
         delta = np.zeros(np.shape(p_corner))
         err = 1000
-        tol = 1e-3
-        max_iter = 20  # maximum number of iterations.
+        tol = self.tol
+        max_iter = self.max_iter  # maximum number of iterations.
         niter = 0
         while err > tol and niter <= max_iter:
             fg_crop = f_crop - g_crop

@@ -2,7 +2,7 @@ from DICpy.utils import *
 import numpy as np
 import copy
 from DICpy.math4dic import gradient, interpolate_template
-from DICpy.dic2d.ImageRegistration import ImageRegistration
+from DICpy.DIC_2D._image_registration import ImageRegistration
 from scipy.interpolate import RectBivariateSpline
 
 

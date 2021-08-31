@@ -2,11 +2,12 @@ from DICpy.utils import *
 import numpy as np
 import copy
 from DICpy.math4dic import gradient, interpolate_template
-from DICpy.dic2d.ImageRegistration import ImageRegistration
+from DICpy.DIC_2D._image_registration import ImageRegistration
+import scipy.spatial.distance as sd
 from scipy.interpolate import RectBivariateSpline
 
 
-class GradientZero(ImageRegistration):
+class GradientOne(ImageRegistration):
     """
     DIC with subpixel resolution using gradients. This class implement a method using zeroth order shape functions, and
     It is a child class of `ImageRegistration`.
@@ -32,12 +33,14 @@ class GradientZero(ImageRegistration):
     **Methods:**
     """
 
-    def __init__(self, mesh_obj=None):
+    def __init__(self, mesh_obj=None, max_iter=20, tol=1e-3):
 
         self.pixel_dim = mesh_obj.images_obj.pixel_dim
         self.mesh_obj = mesh_obj
         self.u = None
         self.v = None
+        self.max_iter = max_iter
+        self.tol = tol
 
         super().__init__(mesh_obj=mesh_obj)
 
@@ -107,14 +110,14 @@ class GradientZero(ImageRegistration):
 
         return px, py
 
-    @staticmethod
-    def _grad_subpixel(f=None, g=None, gap_x=None, gap_y=None, p_corner=None):
+    def _grad_subpixel(self, f=None, g=None, gap_x=None, gap_y=None, p_corner=None):
         """
         Private method from the paper: Application of an improved subpixel registration algorithm on digital speckle
         correlation measurement.
         By: Jun Zhang, Guanchang Jin, Shaopeng Ma, Libo Meng.
 
-        This is a gradient method considering a shape function for pure translation only: x* = x + p.
+        This is a gradient method considering a shape function for affine transformation
+        (including distortion in the deformed image): x* = a x + b.
 
         **Input:**
         * **f** (`ndarray`)
@@ -173,22 +176,67 @@ class GradientZero(ImageRegistration):
         # Initiate the update of the parameters of the shape function.
         delta = np.zeros(np.shape(p_corner))
         err = 1000
-        tol = 1e-3
-        max_iter = 20  # maximum number of iterations.
+        tol = self.tol
+        max_iter = self.max_iter  # maximum number of iterations.
         niter = 0
         while err > tol and niter <= max_iter:
+
+            xx = np.linspace(p_corner[1], p_corner[1] + window_x, window_x)
+            yy = np.linspace(p_corner[0], p_corner[0] + window_y, window_y)
+            XX, YY = np.meshgrid(xx, yy)
+
             fg_crop = f_crop - g_crop
 
-            a11 = np.sum(gx_crop ** 2)
-            a22 = np.sum(gy_crop ** 2)
+            a11 = np.sum(gx_crop * gx_crop)
             a12 = np.sum(gx_crop * gy_crop)
+            a13 = np.sum(gx_crop * gx_crop * XX)
+            a14 = np.sum(gx_crop * gx_crop * YY)
+            a15 = np.sum(gx_crop * gy_crop * XX)
+            a16 = np.sum(gx_crop * gy_crop * YY)
 
-            c1 = np.sum(fg_crop * gx_crop)
-            c2 = np.sum(fg_crop * gy_crop)
+            a22 = np.sum(gy_crop * gy_crop)
+            a23 = np.sum(gx_crop * gy_crop * XX)
+            a24 = np.sum(gx_crop * gy_crop * YY)
+            a25 = np.sum(gy_crop * gy_crop * XX)
+            a26 = np.sum(gy_crop * gy_crop * YY)
 
-            Ainv = np.linalg.inv(np.array([[a11, a12], [a12, a22]]))
-            C = np.array([c1, c2])
-            d_delta = Ainv @ C
+            a33 = np.sum(gx_crop * gx_crop * XX * XX)
+            a34 = np.sum(gx_crop * gx_crop * XX * YY)
+            a35 = np.sum(gx_crop * gy_crop * XX * XX)
+            a36 = np.sum(gx_crop * gx_crop * XX * YY)
+
+            a44 = np.sum(gx_crop * gx_crop * YY * YY)
+            a45 = np.sum(gx_crop * gy_crop * XX * YY)
+            a46 = np.sum(gx_crop * gy_crop * YY * YY)
+
+            a55 = np.sum(gy_crop * gy_crop * XX * XX)
+            a56 = np.sum(gy_crop * gy_crop * XX * YY)
+
+            a66 = np.sum(gy_crop * gy_crop * YY * YY)
+
+            #A_vec = [a11, a12, a13, a14, a15, a16, a22, a23, a24, a25, a26, a33, a34, a35, a36, a44, a45, a46, a55, a56,
+            # a66]
+
+            A_vec = [a12, a13, a14, a15, a16, a23, a24, a25, a26, a34, a35, a36, a45, a46, a56]
+            A = sd.squareform(np.array(A_vec))
+            A[0, 0] = a11
+            A[1, 1] = a22
+            A[2, 2] = a33
+            A[3, 3] = a44
+            A[4, 4] = a55
+            A[5, 5] = a66
+
+            A_inv = np.linalg.inv(A)
+
+            C = np.zeros(6)
+            C[0] = np.sum(fg_crop * gx_crop)
+            C[1] = np.sum(fg_crop * gy_crop)
+            C[1] = np.sum(fg_crop * gx_crop * XX)
+            C[1] = np.sum(fg_crop * gx_crop * YY)
+            C[1] = np.sum(fg_crop * gy_crop * XX)
+            C[1] = np.sum(fg_crop * gy_crop * YY)
+
+            d_delta = A_inv @ C
 
             err = np.linalg.norm(d_delta)
 
@@ -217,5 +265,6 @@ class GradientZero(ImageRegistration):
         # ax2.imshow(g_crop)
         # plt.show()
         # time.sleep(1000)
-        # print(' ')
+        #print(' ')
         return delta
+

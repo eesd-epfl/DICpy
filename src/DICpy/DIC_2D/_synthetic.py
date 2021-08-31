@@ -3,7 +3,7 @@ import cv2
 import skimage as sk
 
 
-class SyntheticData:
+class Synthetic:
     """
     This class contains the methods for generate synthetic data for the DIC analysis.
     **Input:**

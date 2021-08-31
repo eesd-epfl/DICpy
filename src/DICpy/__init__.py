@@ -5,12 +5,10 @@ DICpy: digital imahe correlation with python
 
 import pkg_resources
 
-import DICpy.dic2d
-import DICpy.dic3d
+import DICpy.DIC_2D
 import DICpy.utils
 
-from DICpy.dic2d import *
-from DICpy.dic3d import *
+from DICpy.DIC_2D import *
 from DICpy.utils import *
 
 try:
