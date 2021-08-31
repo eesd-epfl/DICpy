@@ -2,12 +2,11 @@ from DICpy.utils import *
 import numpy as np
 import copy
 from DICpy.math4dic import gradient, interpolate_template
-from DICpy.dic2d.image_registration import ImageRegistration
-import scipy.spatial.distance as sd
+from DICpy.dic2d.ImageRegistration import ImageRegistration
 from scipy.interpolate import RectBivariateSpline
 
 
-class GradientOne(ImageRegistration):
+class GradientZero(ImageRegistration):
     """
     DIC with subpixel resolution using gradients. This class implement a method using zeroth order shape functions, and
     It is a child class of `ImageRegistration`.
@@ -115,8 +114,7 @@ class GradientOne(ImageRegistration):
         correlation measurement.
         By: Jun Zhang, Guanchang Jin, Shaopeng Ma, Libo Meng.
 
-        This is a gradient method considering a shape function for affine transformation
-        (including distortion in the deformed image): x* = a x + b.
+        This is a gradient method considering a shape function for pure translation only: x* = x + p.
 
         **Input:**
         * **f** (`ndarray`)
@@ -179,63 +177,18 @@ class GradientOne(ImageRegistration):
         max_iter = 20  # maximum number of iterations.
         niter = 0
         while err > tol and niter <= max_iter:
-
-            xx = np.linspace(p_corner[1], p_corner[1] + window_x, window_x)
-            yy = np.linspace(p_corner[0], p_corner[0] + window_y, window_y)
-            XX, YY = np.meshgrid(xx, yy)
-
             fg_crop = f_crop - g_crop
 
-            a11 = np.sum(gx_crop * gx_crop)
+            a11 = np.sum(gx_crop ** 2)
+            a22 = np.sum(gy_crop ** 2)
             a12 = np.sum(gx_crop * gy_crop)
-            a13 = np.sum(gx_crop * gx_crop * XX)
-            a14 = np.sum(gx_crop * gx_crop * YY)
-            a15 = np.sum(gx_crop * gy_crop * XX)
-            a16 = np.sum(gx_crop * gy_crop * YY)
 
-            a22 = np.sum(gy_crop * gy_crop)
-            a23 = np.sum(gx_crop * gy_crop * XX)
-            a24 = np.sum(gx_crop * gy_crop * YY)
-            a25 = np.sum(gy_crop * gy_crop * XX)
-            a26 = np.sum(gy_crop * gy_crop * YY)
+            c1 = np.sum(fg_crop * gx_crop)
+            c2 = np.sum(fg_crop * gy_crop)
 
-            a33 = np.sum(gx_crop * gx_crop * XX * XX)
-            a34 = np.sum(gx_crop * gx_crop * XX * YY)
-            a35 = np.sum(gx_crop * gy_crop * XX * XX)
-            a36 = np.sum(gx_crop * gx_crop * XX * YY)
-
-            a44 = np.sum(gx_crop * gx_crop * YY * YY)
-            a45 = np.sum(gx_crop * gy_crop * XX * YY)
-            a46 = np.sum(gx_crop * gy_crop * YY * YY)
-
-            a55 = np.sum(gy_crop * gy_crop * XX * XX)
-            a56 = np.sum(gy_crop * gy_crop * XX * YY)
-
-            a66 = np.sum(gy_crop * gy_crop * YY * YY)
-
-            #A_vec = [a11, a12, a13, a14, a15, a16, a22, a23, a24, a25, a26, a33, a34, a35, a36, a44, a45, a46, a55, a56,
-            # a66]
-
-            A_vec = [a12, a13, a14, a15, a16, a23, a24, a25, a26, a34, a35, a36, a45, a46, a56]
-            A = sd.squareform(np.array(A_vec))
-            A[0, 0] = a11
-            A[1, 1] = a22
-            A[2, 2] = a33
-            A[3, 3] = a44
-            A[4, 4] = a55
-            A[5, 5] = a66
-
-            A_inv = np.linalg.inv(A)
-
-            C = np.zeros(6)
-            C[0] = np.sum(fg_crop * gx_crop)
-            C[1] = np.sum(fg_crop * gy_crop)
-            C[1] = np.sum(fg_crop * gx_crop * XX)
-            C[1] = np.sum(fg_crop * gx_crop * YY)
-            C[1] = np.sum(fg_crop * gy_crop * XX)
-            C[1] = np.sum(fg_crop * gy_crop * YY)
-
-            d_delta = A_inv @ C
+            Ainv = np.linalg.inv(np.array([[a11, a12], [a12, a22]]))
+            C = np.array([c1, c2])
+            d_delta = Ainv @ C
 
             err = np.linalg.norm(d_delta)
 
@@ -264,6 +217,5 @@ class GradientOne(ImageRegistration):
         # ax2.imshow(g_crop)
         # plt.show()
         # time.sleep(1000)
-        #print(' ')
+        # print(' ')
         return delta
-

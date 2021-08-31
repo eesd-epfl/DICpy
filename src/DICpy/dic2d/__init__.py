@@ -1,12 +1,25 @@
-from DICpy.dic2d.regular_grid import *
-from DICpy.dic2d.post_processing import *
-from DICpy.dic2d.pre_processing import *
-from DICpy.dic2d.lucas_kanade import *
-from DICpy.dic2d.image_registration import *
-from DICpy.dic2d.coarse_fine import *
-from DICpy.dic2d.gradient_zero import *
-from DICpy.dic2d.gradient_one import *
-from DICpy.dic2d.crude import *
-from DICpy.dic2d.synthetic import *
+from DICpy.dic2d.RegularGrid import RegularGrid
+from DICpy.dic2d.PostProcessing import PostProcessing
+from DICpy.dic2d.Images import Images
+from DICpy.dic2d.LucasKanade import LucasKanade
+from DICpy.dic2d.ImageRegistration import ImageRegistration
+from DICpy.dic2d.CoarseFine import CoarseFine
+from DICpy.dic2d.GradientZero import GradientZero
+from DICpy.dic2d.GradientOne import GradientOne
+from DICpy.dic2d.Oversampling import Oversampling
+from DICpy.dic2d.Synthetic import Synthetic
+
+
+
+from DICpy.dic2d.RegularGrid import *
+from DICpy.dic2d.PostProcessing import *
+from DICpy.dic2d.Images import *
+from DICpy.dic2d.LucasKanade import *
+from DICpy.dic2d.ImageRegistration import *
+from DICpy.dic2d.CoarseFine import *
+from DICpy.dic2d.GradientZero import *
+from DICpy.dic2d.GradientOne import *
+from DICpy.dic2d.Oversampling import *
+from DICpy.dic2d.Synthetic import *
 
 

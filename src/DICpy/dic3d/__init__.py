@@ -1,1 +1,3 @@
-from DICpy.dic3d.pre_processing import *
+from DICpy.dic3d.PreProcessing import PreProcessing
+
+from DICpy.dic3d.PreProcessing import *

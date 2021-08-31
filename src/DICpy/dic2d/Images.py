@@ -12,7 +12,6 @@ class Images:
     """
     This class contains the methods for reading and processing images used in digital image correlation (DIC).
     **Input:**
-
     **Attributes:**
 
     * **path_speckle** (`str`)

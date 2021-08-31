@@ -2,7 +2,7 @@ from DICpy.utils import *
 from DICpy.utils import _correlation
 import numpy as np
 from DICpy.math4dic import interpolate_template
-from DICpy.dic2d.image_registration import ImageRegistration
+from DICpy.dic2d.ImageRegistration import ImageRegistration
 from scipy.interpolate import RectBivariateSpline
 
 

@@ -2,7 +2,7 @@ from DICpy.utils import *
 import numpy as np
 import copy
 from DICpy.math4dic import gradient, interpolate_template
-from DICpy.dic2d.image_registration import ImageRegistration
+from DICpy.dic2d.ImageRegistration import ImageRegistration
 from scipy.interpolate import RectBivariateSpline
 
 
@@ -149,7 +149,10 @@ class GradientZero(ImageRegistration):
         window_x = abs(xtem_1 - xtem_0) + 1
         window_y = abs(ytem_1 - ytem_0) + 1
 
-        # using Sobel.
+        # First order derivatives.
+        gx, gy = gradient(g, k=7)
+
+        # second order derivatives.
         gx, gy = gradient(g, k=7)
 
         # Interpolants.

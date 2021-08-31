@@ -2,11 +2,11 @@ from DICpy.utils import *
 import numpy as np
 import copy
 from DICpy.math4dic import gradient, interpolate_template
-from DICpy.dic2d.image_registration import ImageRegistration
+from DICpy.dic2d.ImageRegistration import ImageRegistration
 from scipy.interpolate import RectBivariateSpline
 
 
-class Crude(ImageRegistration):
+class Oversampling(ImageRegistration):
     """
     DIC with subpixel resolution using oversampling.
 
