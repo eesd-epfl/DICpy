@@ -21,7 +21,7 @@ DICpy: digital image correlation with python
 
 :Authors: Ketson R. M. dos Santos
 :Contact: ketson.santos@epfl.ch
-:Version: 0.3.0
+:Version: 0.3.1
 
 
 Description
