@@ -117,6 +117,7 @@ class PostProcessing:
                     d21 = (pred1vx - pred0vx) / h
                     d22 = (pred1vy - pred0vy) / h
 
+                    # Compute strain fields.
                     strain_11[i, j] = d11 + 0.5 * (d11 ** 2 + d22 ** 2)
                     strain_22[i, j] = d22 + 0.5 * (d11 ** 2 + d22 ** 2)
                     strain_12[i, j] = 0.5 * (d12 + d21 + d11 * d12 + d21 * d22)
@@ -135,7 +136,6 @@ class PostProcessing:
         self.strain21 = np.array(strain_matrix_21)
 
     def visualization(self, results="u", step=0, smooth=False):
-
         """
         Method to plot the results in terms of displacements and strains.
 
@@ -148,8 +148,9 @@ class PostProcessing:
             -'e22': strain yy:
             -'e12': strain xy.
             -'e21': strain yx.
+
         * **step** (`int`)
-            Define the result for a given loading step.
+            Load step of interest.
 
         * **smooth** (`bool`)
             Gaussian filtering.
@@ -206,9 +207,6 @@ class PostProcessing:
         else:
             raise ValueError('DICpy: not valid option for results.')
 
-        # mask = 255*np.ones((2000, 2000))
-        # mask = self.strain11[step, :, :]
-        # mask = v[0,:,:]
         img = images[step]
 
         x = np.arange(0, np.shape(img)[1])

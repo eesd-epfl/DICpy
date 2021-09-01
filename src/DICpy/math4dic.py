@@ -127,7 +127,7 @@ def interpolate_template(f=None, x=None, y=None, dx=0, dy=0, dim=None):
 
 def gradient(img, k):
     """
-    Estimage the gradient of images using Sobel filters from OpenCV-Python.
+    Estimate the gradient of images using Sobel filters from OpenCV-Python.
 
     **Input:**
     * **img** (`ndarray`)

@@ -4,22 +4,21 @@ from DICpy.DIC_2D._image_registration import ImageRegistration
 
 
 class LucasKanade(ImageRegistration):
-
     """
     DIC with subpixel resolution using the Lucas-Kanade algorithm implemented in OpenCV-Python, and It is a child class
     of `ImageRegistration`.
 
     **Input:**
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of ``RegularGrid``.
 
     **Attributes:**
 
     * **pixel_dim** (`float`)
-        Size of each pixel in length dimension.
+        Constant to convert pixel into a physical quantity (e.g., mm).
 
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of the ``RegularGrid``.
 
     * **u** (`ndarray`)
         Displacements in the x (columns) dimension at the center of each cell.
@@ -40,10 +39,8 @@ class LucasKanade(ImageRegistration):
         super().__init__(mesh_obj=mesh_obj)
 
     def run(self):
-
         """
-        Method to run the DIC analysis.
-
+        Method for performing the DIC analysis. It overrides the one in ``ImageRegistration``
         """
 
         # Get images and the number of images in the object images.
@@ -85,7 +82,6 @@ class LucasKanade(ImageRegistration):
                     lx_list.append(l_x)
                     ly_list.append(l_y)
 
-            # todo: make the lenths the same.
             l_x = np.max(lx_list)
             l_y = np.max(ly_list)
             centers = np.array(centers)

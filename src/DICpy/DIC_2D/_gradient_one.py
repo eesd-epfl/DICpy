@@ -14,21 +14,27 @@ class GradientOne(ImageRegistration):
 
     **Input:**
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of ``RegularGrid``.
 
     **Attributes:**
 
     * **pixel_dim** (`float`)
-        Size of each pixel in length dimension.
+        Constant to convert pixel into a physical quantity (e.g., mm).
 
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of the ``RegularGrid``.
 
     * **u** (`ndarray`)
         Displacements in the x (columns) dimension at the center of each cell.
 
     * **v** (`ndarray`)
         Displacements in the y (rows) dimension at the center of each cell.
+
+    * **max_iter** (`ndarray`)
+        Maximum number of iterations in the optimization process.
+
+    * **tol** (`ndarray`)
+        Error tolerance in the optimization process.
 
     **Methods:**
     """
@@ -45,9 +51,9 @@ class GradientOne(ImageRegistration):
         super().__init__(mesh_obj=mesh_obj)
 
     def _registration(self, img_0, img_1, psearch, ptem, lengths, windows, gaps):
-
         """
-        Private method for estimating the displacements using image registration techniques.
+        Private method for estimating the displacements using the template matching technique with subpixel resolution.
+        This method overrides the one in the parent class.
 
         **Input:**
         * **img_0** (`ndarray`)
@@ -60,7 +66,7 @@ class GradientOne(ImageRegistration):
             Upper left corner of the searching area.
 
         * **ptem** (`tuple`)
-            Point containing the upper left corner of the template.
+            Upper left corner of the template.
 
         * **lengths** (`tuple`)
             Lengths in x and y of the searching area (length_x, length_y).
@@ -112,10 +118,6 @@ class GradientOne(ImageRegistration):
 
     def _grad_subpixel(self, f=None, g=None, gap_x=None, gap_y=None, p_corner=None):
         """
-        Private method from the paper: Application of an improved subpixel registration algorithm on digital speckle
-        correlation measurement.
-        By: Jun Zhang, Guanchang Jin, Shaopeng Ma, Libo Meng.
-
         This is a gradient method considering a shape function for affine transformation
         (including distortion in the deformed image): x* = a x + b.
 
@@ -155,7 +157,7 @@ class GradientOne(ImageRegistration):
         # using Sobel.
         gx, gy = gradient(g, k=7)
 
-        # Interpolants.
+        # Interpolation.
         dim = np.shape(g)
         x0 = np.arange(0, dim[1])
         y0 = np.arange(0, dim[0])
@@ -187,6 +189,7 @@ class GradientOne(ImageRegistration):
 
             fg_crop = f_crop - g_crop
 
+            # Get the matrices and solve the corresponding linear system.
             a11 = np.sum(gx_crop * gx_crop)
             a12 = np.sum(gx_crop * gy_crop)
             a13 = np.sum(gx_crop * gx_crop * XX)
@@ -214,9 +217,6 @@ class GradientOne(ImageRegistration):
 
             a66 = np.sum(gy_crop * gy_crop * YY * YY)
 
-            #A_vec = [a11, a12, a13, a14, a15, a16, a22, a23, a24, a25, a26, a33, a34, a35, a36, a44, a45, a46, a55, a56,
-            # a66]
-
             A_vec = [a12, a13, a14, a15, a16, a23, a24, a25, a26, a34, a35, a36, a45, a46, a56]
             A = sd.squareform(np.array(A_vec))
             A[0, 0] = a11
@@ -236,35 +236,28 @@ class GradientOne(ImageRegistration):
             C[1] = np.sum(fg_crop * gy_crop * XX)
             C[1] = np.sum(fg_crop * gy_crop * YY)
 
+            # Get the step increment.
             d_delta = A_inv @ C
 
+            # Get the norm of the step increment to check the convergence.
             err = np.linalg.norm(d_delta)
 
+            # Step update.
             delta[0] = delta[0] + d_delta[0]
             delta[1] = delta[1] + d_delta[1]
 
+            # Update the position of the upper left corner.
             p_corner[0] = pc[0] + delta[0]
             p_corner[1] = pc[1] + delta[1]
 
             # Interpolate.
-            # todo: adjust convention.
             x = np.linspace(p_corner[1], p_corner[1] + window_x, window_x)
             y = np.linspace(p_corner[0], p_corner[0] + window_y, window_y)
-            # g_crop = interpolate_template(f=g, x=x, y=y)
-            # gx_crop = interpolate_template(f=gx, x=x, y=y)
-            # gy_crop = interpolate_template(f=gy, x=x, y=y)
             g_crop = interpolate_template(f=interp_g, x=x, y=y, dim=dim)
             gx_crop = interpolate_template(f=interp_gx, x=x, y=y, dim=dim)
             gy_crop = interpolate_template(f=interp_gy, x=x, y=y, dim=dim)
 
             niter += 1
 
-        # print(niter-1, err)
-        # fig, (ax1, ax2) = plt.subplots(1, 2)
-        # ax1.imshow(f_crop)
-        # ax2.imshow(g_crop)
-        # plt.show()
-        # time.sleep(1000)
-        #print(' ')
         return delta
 

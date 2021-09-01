@@ -7,14 +7,14 @@ from matplotlib.widgets import Button
 
 class RegularGrid:
     """
-    This class contains the methods for creating a rectangular mesh used in the DIC analysis.
+    This class contains the methods for creating a rectangular grid used in the DIC analysis.
+
     **Input:**
     * **images_obj** (`object`)
         Object containing the speckle images, reference images, and calibration images, as well as calibration
         parameters.
 
     **Attributes:**
-
     * **images_obj** (`object`)
         Object containing the speckle images, reference images, and calibration images, as well as calibration
         parameters.
@@ -26,16 +26,16 @@ class RegularGrid:
         Steps for the grid in the y direction (rows).
 
     * **centers** (`list`)
-        Centers for each cell in the grid.
+        Center of each cell in the grid.
 
     * **wind** (`list`)
-        Dimensions in both x and y dimensions for each cell.
+        Dimensions in both x and y dimensions of each cell.
 
     * **xp** (`ndarray`)
-        Position of the upper right corner for each cell (grid in the x direction - columns).
+        Position of the upper right corner of each cell (grid in the x direction - columns).
 
     * **yp** (`ndarray`)
-        Position of the upper right corner for each cell (grid in the y direction - rows).
+        Position of the upper right corner of each cell (grid in the y direction - rows).
 
     * **nx** (`int`)
         Number of nodes in the x direction (columns).
@@ -47,7 +47,7 @@ class RegularGrid:
         First corner of the region of interest (ROI).
 
     * **point_b** (`float`)
-        Corner opposed to point_b of the region of interest (ROI).
+        Opposed corner of the region of interest (ROI).
 
     **Methods:**
     """
@@ -67,9 +67,8 @@ class RegularGrid:
         self.point_b = None
 
     def define_mesh(self, point_a=None, point_b=None, nx=2, ny=2, show_grid=False):
-
         """
-        Method to construct the rectangular mesh used in the DIC analysis.
+        Method to construct the rectangular grid used in the DIC analysis.
 
         **Input:**
         * **point_a** (`float`)
@@ -202,7 +201,6 @@ class RegularGrid:
             plt.show()
 
     def _get_elements_Q4(self):
-
         """
         Private method to determine the elements of the mesh (under construction!).
 
@@ -229,7 +227,6 @@ class RegularGrid:
 
     @staticmethod
     def _mouse_click(event):
-
         """
         Private method: mouse click to select the ROI.
 
