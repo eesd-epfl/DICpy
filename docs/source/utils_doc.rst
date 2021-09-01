@@ -1,10 +1,7 @@
 .. _utils_doc:
 
-Utils
-=============
-
 DICpy.utils
------------------------------
+=============
 
 .. automodule:: DICpy.utils
    :members:
