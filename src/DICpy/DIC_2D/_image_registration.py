@@ -6,20 +6,20 @@ from skimage.feature import match_template
 
 class ImageRegistration:
     """
-    This class has the methods to perform the DIC analysis without considering the subpixel resolution.
+    This class has the methods to perform the DIC analysis with integer resolution.
     This is a parent class for children classes implementing methods with subpixel resolution.
 
     **Input:**
     * **mesh_obj** (`object`)
-        Object of the RectangularMesh class.
+        Object of ``RegularGrid``.
 
     **Attributes:**
 
     * **pixel_dim** (`float`)
-        Size of each pixel in length dimension.
+        Constant to convert pixel into a physical quantity (e.g., mm).
 
     * **mesh_obj** (`object`)
-        Object of the RectangularMesh class.
+        Object of the ``RegularGrid``.
 
     * **u** (`ndarray`)
         Displacements in the x (columns) dimension at the center of each cell.
@@ -38,29 +38,8 @@ class ImageRegistration:
         self.v = None
 
     def run(self):
-
         """
-        Method to perform the DIC analysis.
-
-        **Input:**
-        * **sub_pixel** (`str`)
-            Method for the sub-pixel refining:
-            - None: do not perform the sub-pixel refining.
-            - 'Crude': crude method based on the image oversampling.
-            - 'gradient': gradient based sub-pixel refining.
-            - 'coarse_fine': method based on the sequential refining of the pixel domain.
-            - 'lukas_kanade': method based on the Lukas-Kanade optical flow.
-
-        * **oversampling_x** (`int`)
-            Oversampling in the x dimension used when 'Crude' method is adopted, default is 1 (equal to 'crude').
-
-        * **oversampling_y** (`int`)
-            Oversampling in the y dimension used when 'Crude' method is adopted, default is 1 (equal to 'crude')..
-
-        * **niter** (`int`)
-            Number of iterations used when 'coarse_fine' method is adopted, default is 1.
-
-        **Output/Returns:**
+        Method for performing the DIC analysis.
         """
 
         images = self.mesh_obj.images_obj.images
@@ -125,9 +104,8 @@ class ImageRegistration:
         self.v = np.array(v)
 
     def _registration(self, img_0, img_1, psearch, ptem, lengths, windows, gaps):
-
         """
-        Private method for estimating the displacements using image registration techniques.
+        Private method for estimating the displacements using the template matching technique with integer resolution.
 
         **Input:**
         * **img_0** (`ndarray`)
@@ -140,7 +118,7 @@ class ImageRegistration:
             Upper left corner of the searching area.
 
         * **ptem** (`tuple`)
-            Point containing the upper left corner of the template.
+            Upper left corner of the template.
 
         * **lengths** (`tuple`)
             Lengths in x and y of the searching area (length_x, length_y).
@@ -177,12 +155,10 @@ class ImageRegistration:
 
         return px, py
 
-
     @staticmethod
     def _template_match_sk(img_source, img_template, mlx=1, mly=1):
-
         """
-        Method for template matching using correlation.
+        Method for template matching using the normalized cross correlation.
 
         **Input:**
         * **img_source** (`ndarray`)

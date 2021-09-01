@@ -10,35 +10,20 @@ class Synthetic:
 
     **Attributes:**
 
-    * **path_speckle** (`str`)
-        Path to the speckle images.
-
-    * **path_calibration** (`str`)
-        Path to the calibration image.
-
-    * **ref_image** (`ndarray`)
-        Reference image.
-
-    * **calibration_image** (`ndarray`)
-        Calibration image.
-
-    * **images** (`ndarray`)
-        Gray images.
-
-    * **images_normalized** (`ndarray`)
-        Gray images normalized by 255.
-
-    * **lx** (`int`)
-        Number of columns of each image.
-
-    * **ly** (`int`)
-        Number of rows of each image.
-
-    * **num_img** (`int`)
+    * **num_images** (`int`)
         Number of images.
 
-    * **pixel_dim** (`float`)
-        Size of each pixel in length dimension.
+    * **size** (`tuple`)
+        Images shapse.
+
+    * **extension** (`str`)
+        Extension to save the files.
+
+    * **random_state** (`int`)
+        Random seed
+
+    * **save_images** (`bool`)
+        Boolean variable to save the generated images.
 
     **Methods:**
     """
@@ -55,15 +40,39 @@ class Synthetic:
         if self.random_state is None:
             self.random_state = np.random.randint(0, high=99999, size=1, dtype=int)[0]
 
-    def generate_images(self, num_speckles=100, sigma=2, displacement_x=None, displacement_y=None):
+    def generate_images(self, num_speckles=100, sigma=2, displacement_x=None, displacement_y=None, shear=None):
+        """
+        Generate images.
+
+        **Input:**
+        * **num_speckles** (`int`)
+            Number of speckles per images.
+
+        * **sigma** (`float`)
+            Variable to control the size the speckles.
+
+        * **displacement_x** (`list`)
+            Displacement x to include in each image.
+
+        * **displacement_y** (`list`)
+            Displacement y to include in each image.
+
+        * **shear** (`list`)
+            Shear to include in each image.
+
+        * **Output/Returns:**
+        """
 
         n = self.num_images
 
         if len(displacement_x) != n:
-            raise ValueError('DICpy: size of displacement_x must be equal to num_images.')
+            raise ValueError('DICpy: size of `displacement_x` must be equal to num_images.')
 
         if len(displacement_y) != n:
-            raise ValueError('DICpy: size of displacement_y must be equal to num_images.')
+            raise ValueError('DICpy: size of `displacement_y` must be equal to num_images.')
+
+        if len(shear) != n:
+            raise ValueError('DICpy: size of `shear` must be equal to num_images.')
 
         images = []
         img0 = self._gen_gaussian(dx=displacement_x[0], dy=displacement_y[0], num_speckles=num_speckles, sigma=sigma)
@@ -75,16 +84,14 @@ class Synthetic:
 
         for i in np.arange(1, n):
 
-            #img = self._gen_gaussian(dx=displacement_x[i], dy=displacement_y[i], num_speckles=num_speckles, sigma=sigma)
             t = (displacement_x[i], displacement_y[i])
 
             # Create Afine transform
-            afine_tf = sk.transform.AffineTransform(matrix=None, scale=None, rotation=None, shear=0.01, translation=t)
+            afine_tf = sk.transform.AffineTransform(matrix=None, scale=None, rotation=None, shear=shear, translation=t)
 
             # Apply transform to image data
             img = sk.transform.warp(img0, inverse_map=afine_tf,mode='constant', cval=1)
-            img=np.round(img * 255).astype(np.uint8)
-            print(img)
+            img = np.round(img * 255).astype(np.uint8)
             images.append(img)
 
             if self.save_images:
@@ -93,28 +100,25 @@ class Synthetic:
         self.images = images
 
     def _gen_gaussian(self, dx=None, dy=None, num_speckles=100, sigma=2):
-
         """
-        Read the speckle images.
+        Private method: generate the bivariate Gaussians.
 
         **Input:**
         * **dx** (`float`)
-            Displacement in the x direction.
+            Displacements in x.
 
         * **dy** (`float`)
-            Displacement in the y direction.
+            Displacements in y.
+
+        * **sigma** (`float`)
+            Variable to control the size the speckles.
 
         * **num_speckles** (`int`)
-            Number of speackles.
+            Number of speckles per images.
 
-        * **ref_id** (`int`)
-            Define a file to be used as reference, the default is zero, which means that the first image in the stack will
-            be used as reference.
-
-        * **verbose** (`bool`)
-            Boolean varible to print some information on screen.
-
-        **Output/Returns:**
+        * **Output/Returns:**
+        * **img** (`ndarray`)
+            Generated image.
         """
 
         nx, ny = self.size

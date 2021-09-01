@@ -1,9 +1,5 @@
 from DICpy.utils import *
-import numpy as np
-import copy
-from DICpy.math4dic import gradient, interpolate_template
 from DICpy.DIC_2D._image_registration import ImageRegistration
-from scipy.interpolate import RectBivariateSpline
 
 
 class Oversampling(ImageRegistration):
@@ -12,21 +8,27 @@ class Oversampling(ImageRegistration):
 
     **Input:**
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of ``RegularGrid``.
 
     **Attributes:**
 
     * **pixel_dim** (`float`)
-        Size of each pixel in length dimension.
+        Constant to convert pixel into a physical quantity (e.g., mm).
 
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of the ``RegularGrid``.
 
     * **u** (`ndarray`)
         Displacements in the x (columns) dimension at the center of each cell.
 
     * **v** (`ndarray`)
         Displacements in the y (rows) dimension at the center of each cell.
+
+    * **over_x** (`int`)
+        Parameter used for oversampling in the x direction (columns).
+
+    * **over_y** (`int`)
+        Parameter used for oversampling in the y direction (rows).
 
     **Methods:**
     """
@@ -43,9 +45,9 @@ class Oversampling(ImageRegistration):
         super().__init__(mesh_obj=mesh_obj)
 
     def _registration(self, img_0, img_1, psearch, ptem, lengths, windows, gaps):
-
         """
-        Private method for estimating the displacements using image registration techniques.
+        Private method for estimating the displacements using the template matching technique with subpixel resolution.
+        This method overrides the one in the parent class.
 
         **Input:**
         * **img_0** (`ndarray`)
@@ -58,7 +60,7 @@ class Oversampling(ImageRegistration):
             Upper left corner of the searching area.
 
         * **ptem** (`tuple`)
-            Point containing the upper left corner of the template.
+            Upper left corner of the template.
 
         * **lengths** (`tuple`)
             Lengths in x and y of the searching area (length_x, length_y).

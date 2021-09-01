@@ -113,11 +113,9 @@ class Images:
             if verbose:
                 print(f)
 
-            #im = sio.imread(os.path.join(path, f), as_gray=True)
             im = cv2.imread(os.path.join(path, f), 0)
 
             images.append(im)
-            #images.append(np.asarray(255 * im, dtype=np.uint8))
             images_normalized.append(im/255)
 
         self.images = images

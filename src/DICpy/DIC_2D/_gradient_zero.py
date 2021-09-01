@@ -13,21 +13,27 @@ class GradientZero(ImageRegistration):
 
     **Input:**
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of ``RegularGrid``.
 
     **Attributes:**
 
     * **pixel_dim** (`float`)
-        Size of each pixel in length dimension.
+        Constant to convert pixel into a physical quantity (e.g., mm).
 
     * **mesh_obj** (`object`)
-        Object of the RegularGrid class.
+        Object of the ``RegularGrid``.
 
     * **u** (`ndarray`)
         Displacements in the x (columns) dimension at the center of each cell.
 
     * **v** (`ndarray`)
         Displacements in the y (rows) dimension at the center of each cell.
+
+    * **max_iter** (`ndarray`)
+        Maximum number of iterations in the optimization process.
+
+    * **tol** (`ndarray`)
+        Error tolerance in the optimization process.
 
     **Methods:**
     """
@@ -44,9 +50,9 @@ class GradientZero(ImageRegistration):
         super().__init__(mesh_obj=mesh_obj)
 
     def _registration(self, img_0, img_1, psearch, ptem, lengths, windows, gaps):
-
         """
-        Private method for estimating the displacements using image registration techniques.
+        Private method for estimating the displacements using the template matching technique with subpixel resolution.
+        This method overrides the one in the parent class.
 
         **Input:**
         * **img_0** (`ndarray`)
@@ -59,7 +65,7 @@ class GradientZero(ImageRegistration):
             Upper left corner of the searching area.
 
         * **ptem** (`tuple`)
-            Point containing the upper left corner of the template.
+            Upper left corner of the template.
 
         * **lengths** (`tuple`)
             Lengths in x and y of the searching area (length_x, length_y).
@@ -111,10 +117,6 @@ class GradientZero(ImageRegistration):
 
     def _grad_subpixel(self, f=None, g=None, gap_x=None, gap_y=None, p_corner=None):
         """
-        Private method from the paper: Application of an improved subpixel registration algorithm on digital speckle
-        correlation measurement.
-        By: Jun Zhang, Guanchang Jin, Shaopeng Ma, Libo Meng.
-
         This is a gradient method considering a shape function for pure translation only: x* = x + p.
 
         **Input:**
@@ -180,6 +182,7 @@ class GradientZero(ImageRegistration):
         while err > tol and niter <= max_iter:
             fg_crop = f_crop - g_crop
 
+            # Get the matrices and solve the corresponding linear system.
             a11 = np.sum(gx_crop ** 2)
             a22 = np.sum(gy_crop ** 2)
             a12 = np.sum(gx_crop * gy_crop)
@@ -187,36 +190,30 @@ class GradientZero(ImageRegistration):
             c1 = np.sum(fg_crop * gx_crop)
             c2 = np.sum(fg_crop * gy_crop)
 
-            Ainv = np.linalg.inv(np.array([[a11, a12], [a12, a22]]))
+            A_inv = np.linalg.inv(np.array([[a11, a12], [a12, a22]]))
             C = np.array([c1, c2])
-            d_delta = Ainv @ C
 
+            # Get the step increment.
+            d_delta = A_inv @ C
+
+            # Get the norm of the step increment to check the convergence.
             err = np.linalg.norm(d_delta)
 
+            # Step update.
             delta[0] = delta[0] + d_delta[0]
             delta[1] = delta[1] + d_delta[1]
 
+            # update the position of the upper left corner.
             p_corner[0] = pc[0] + delta[0]
             p_corner[1] = pc[1] + delta[1]
 
             # Interpolate.
-            # todo: adjust convention.
             x = np.linspace(p_corner[1], p_corner[1] + window_x, window_x)
             y = np.linspace(p_corner[0], p_corner[0] + window_y, window_y)
-            # g_crop = interpolate_template(f=g, x=x, y=y)
-            # gx_crop = interpolate_template(f=gx, x=x, y=y)
-            # gy_crop = interpolate_template(f=gy, x=x, y=y)
             g_crop = interpolate_template(f=interp_g, x=x, y=y, dim=dim)
             gx_crop = interpolate_template(f=interp_gx, x=x, y=y, dim=dim)
             gy_crop = interpolate_template(f=interp_gy, x=x, y=y, dim=dim)
 
             niter += 1
 
-        # print(niter-1, err)
-        # fig, (ax1, ax2) = plt.subplots(1, 2)
-        # ax1.imshow(f_crop)
-        # ax2.imshow(g_crop)
-        # plt.show()
-        # time.sleep(1000)
-        # print(' ')
         return delta
