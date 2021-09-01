@@ -61,7 +61,6 @@ class Images:
         self.pixel_dim = 1
 
     def read_speckle_images(self, path=None, extension=None, file_names=None, ref_id=0, verbose=False):
-
         """
         Read the speckle images.
 
@@ -128,7 +127,6 @@ class Images:
 
     @staticmethod
     def _read_calibration_images(path=None, file_name=None, verbose=True):
-
         """
         Private method for reading the calibration image.
 
@@ -163,7 +161,6 @@ class Images:
 
     def calibration(self, ref_length=None, pixel_dim=None, path=None, file_name=None,
                     point_a=None, point_b=None, verbose=True):
-
         """
         Method for the analysis calibration.
 
@@ -232,19 +229,16 @@ class Images:
 
                 lx = (point_b[0] - point_a[0])
                 ly = (point_b[1] - point_a[1])
-                #rect = patches.Rectangle(point_a, lx, ly, linewidth=1, edgecolor='None', facecolor='b', alpha=0.4)
-                #ax.add_patch(rect)
+
                 fig.canvas.draw()  # this line was missing earlier
 
                 plt.imshow(cal_img, cmap="gray")
                 plt.show(block=False)
                 plt.close()
 
-
             point_a = (round(point_a[0]),round(point_a[1]))
             point_b = (round(point_b[0]),round(point_b[1]))
 
-            #plt.close()
             fig = plt.figure()
             ax = fig.add_subplot(111)
 
@@ -258,8 +252,6 @@ class Images:
             ax.add_patch(circle)
             fig.canvas.draw()  # this line was missing earlier
 
-            #rect = patches.Rectangle(point_a, lx, ly, linewidth=1, edgecolor='None', facecolor='b', alpha=0.4)
-            #ax.add_patch(rect)
             ax.plot([point_a[0], point_b[0]], [point_a[1], point_b[1]], linewidth=2)
             fig.canvas.draw()
             plt.imshow(cal_img, cmap="gray")
@@ -286,7 +278,6 @@ class Images:
 
     @staticmethod
     def _mouse_click(event):
-
         """
         Private method: mouse click to select the ROI.
 
