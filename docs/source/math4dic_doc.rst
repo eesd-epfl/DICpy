@@ -1,10 +1,7 @@
 .. _math4dic_doc:
 
-math4dic
-=============
-
 DICpy.math4dic
------------------------------
+==============
 
 .. automodule:: DICpy.math4dic
    :members:
