@@ -2,17 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def _correlation(f, g):
-    m_f = np.mean(f)
-    m_g = np.mean(g)
-
-    c = np.sqrt(np.sum((f - m_f) ** 2) * np.sum((g - m_g) ** 2))
-    corr = np.sum((f - m_f) * (g - m_g)) / c
-
-    return corr
-
-
 def _mouse_click(event):
+    """
+    Private: function to capture the coordinates of a mouse click over an image.
+
+    **Input:**
+    * **event** (`object`)
+        Event of mouse click.
+
+    **Output/Returns:**
+    * **coords** (`list`)
+        Position of the mouse click in the image.
+    """
+
     global x, y
     x, y = event.xdata, event.ydata
 
@@ -42,6 +44,30 @@ def _mouse_click(event):
 
 
 def get_template(im_source=None, center=None, side=None):
+    """
+    Get a square template from image considering the a central coordinate.
+
+    **Input:**
+    * **im_source** (`ndarray`)
+        Image source is the image from where the template is retrieved.
+
+    * **center** (`list/tuple/ndarray`)
+        Coordinates of the central pixel of the template.
+
+    * **side** (`int`)
+        How many pixels in each side of the central pixel will be used to construct the template.
+
+    * **Output/Returns:**
+    * **im_template** (`ndarray`)
+        Template retrieved from `im_source`.
+
+    * **id_row** (`ndarray`)
+        Coordinates (rows) for locating the template in `im_source`.
+
+    * **id_col** (`ndarray`)
+        Coordinates (columns) for locating the template in `im_source`.
+    """
+
     # Crop image (im_source) to get a square patch (im_template) with center in
     # (center_row, center_col) with width (in pixels) given as an argument.
     if not isinstance(side, int):
@@ -65,15 +91,27 @@ def get_template(im_source=None, center=None, side=None):
 
 
 def get_template_left(im_source=None, point=None, sidex=None, sidey=None):
-    # Crop image (im_source) to get a square patch (im_template) with center in
-    # (center_row, center_col) with width (in pixels) given as an argument.
-    # if not isinstance(sidex, int):
-    #    raise ValueError('pyCrack: side must be an integer!')
+    """
+    Get a rectangular template from image considering the upper left corner as a reference.
 
-    # if not isinstance(sidey, int):
-    #    raise ValueError('pyCrack: side must be an integer!')
+    **Input:**
+    * **im_source** (`ndarray`)
+        Image source is the image from where the template is retrieved.
 
-    # else:
+    * **point** (`list/tuple/ndarray`)
+        Coordinates of the upper left coorner pixel (reference pixel) of the template.
+
+    * **sidex** (`int`)
+        Template size in x direction (columns).
+
+    * **sidey** (`int`)
+        Template size in y direction (rows).
+
+    * **Output/Returns:**
+    * **im_template** (`ndarray`)
+        Template retrieved from `im_source`.
+    """
+
     p_row = point[0]
     p_col = point[1]
     row_0 = p_row
@@ -91,28 +129,12 @@ def get_template_left(im_source=None, point=None, sidex=None, sidey=None):
 
 
 def _close(event):
+    """
+    Private: function to close events such as mouse click.
+
+    **Input:**
+    * **event** (`object`)
+        Event of mouse click.
+    """
+
     plt.close()
-
-
-def pad(model_script, model_object_name, sample, dict_kwargs=None):
-    """
-    Execute the python model in parallel
-    :param sample: One sample point where the model has to be evaluated
-    :return:
-    """
-
-    exec('from ' + model_script[:-3] + ' import ' + model_object_name)
-    # if kwargs is not None:
-    #     par_res = eval(model_object_name + '(sample, kwargs)')
-    # else:
-    if dict_kwargs is None:
-        par_res = eval(model_object_name + '(sample)')
-    else:
-        par_res = eval(model_object_name + '(sample, **dict_kwargs)')
-    # par_res = parallel_output
-    # if self.model_is_class:
-    #     par_res = parallel_output.qoi
-    # else:
-    #     par_res = parallel_output
-
-    return par_res
